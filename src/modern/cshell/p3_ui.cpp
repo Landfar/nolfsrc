@@ -15,6 +15,7 @@ VarTrack g_vtP3ShowFramerate;
 VarTrack g_vtP3NoFunMenus;
 VarTrack g_vtP3Cinematics4x3;
 VarTrack g_vtP3UseGotyMenu;
+VarTrack g_vtP3TextScale;
 
 void P3_InitVars()
 {
@@ -25,6 +26,7 @@ void P3_InitVars()
 	g_vtP3NoFunMenus.Init(g_pLTClient, "NoFunMenus", LTNULL, 0.0f);
 	g_vtP3Cinematics4x3.Init(g_pLTClient, "RestrictCinematicsTo4x3", LTNULL, 0.0f);
 	g_vtP3UseGotyMenu.Init(g_pLTClient, "UseGotyMenu", LTNULL, 1.0f);
+	g_vtP3TextScale.Init(g_pLTClient, "TextScale", LTNULL, 1.0f);
 }
 
 // ---------------------------------------------------------------------------
@@ -275,6 +277,23 @@ float P3_HUDScale()
 
 	// never smaller than the retail game draws it
 	return (fScale < 1.0f) ? 1.0f : fScale;
+}
+
+int P3_TextScale()
+{
+	float fScale = g_vtP3TextScale.GetFloat(1.0f);
+	if (fScale <= 0.0f) return 1;
+	if (fScale > 4.0f) fScale = 4.0f;
+
+	int nScale = (int)(fScale * g_pInterfaceResMgr->GetYRatio() + 0.5f);
+	if (nScale < 1) nScale = 1;
+	if (nScale > 8) nScale = 8;
+	return nScale;
+}
+
+void P3_ApplyTextScale()
+{
+	LithBitmapFont::SetGlobalScale(P3_TextScale());
 }
 
 void P3_DrawScaled(HSURFACE hDest, HSURFACE hSrc, int x, int y, float fScale, HLTCOLOR hTrans)

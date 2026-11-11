@@ -90,6 +90,13 @@ int         P3_MainFolder(int nFolderID);  // FOLDER_ID_MAIN -> today's main men
 // ---- M-P3-12: HUD scaling
 
 float       P3_HUDScale();
+
+// HD fonts, stage 1: the bitmap fonts' glyph scale for the current screen,
+// the height ratio times TextScale rounded to a whole number (0 = off, 1 =
+// the default, retail 640x480 text size relative to the screen); applied to
+// every bitmap font (LithBitmapFont::SetGlobalScale). Called on each mode change.
+int         P3_TextScale();
+void        P3_ApplyTextScale();
 // Draw a surface scaled by fScale with its top-left corner at (x, y).
 void        P3_DrawScaled(HSURFACE hDest, HSURFACE hSrc, int x, int y,
                           float fScale, HLTCOLOR hTrans);

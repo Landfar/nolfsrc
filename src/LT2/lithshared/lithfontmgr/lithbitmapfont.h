@@ -110,6 +110,24 @@ class LithBitmapFont : public LithFont
 		// Line drawing functions
 		void	_Draw(int nX, int nY, uint32 nIndex1 = 0, uint32 nIndex2 = 0);
 		void	_DrawSolid(int nX, int nY, uint32 nIndex1 = 0, uint32 nIndex2 = 0);
+#ifdef NOLFSRC_MODERN
+
+	// HD-fonts stage 1: every bitmap font draws its glyphs s times larger
+	// (nearest-neighbour, an integer s keeps them crisp) and measures in the
+	// same enlarged pixels. The game sets s from the screen (TextScale).
+	public:
+		static void	SetGlobalScale(int nScale);
+		static int	GetGlobalScale()	{ return s_nScale; }
+
+	private:
+		void	ApplyScale();
+		void	BlitGlyph(int nX, int nY, LTBOOL bSolid);
+
+		static int	s_nScale;
+		int			m_nScale;						// the scale the metrics below are at
+		uint32		m_aBaseWidths[LTF_NUM_TOTAL_CHARS];	// m_lfOD.pWidths at scale 1
+		uint32		m_nBaseAvgWidth;				// m_nAvgWidth at scale 1
+#endif
 };
 
 //*********************************************************************************

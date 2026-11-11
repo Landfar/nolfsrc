@@ -609,6 +609,9 @@ void CInterfaceResMgr::ScreenDimsChanged()
 #ifdef NOLFSRC_MODERN
 	// M-P1-06: size, centre or un-frame the window for the new mode
 	P1Window_Apply();
+
+	// HD fonts, stage 1: the bitmap fonts' glyph scale follows the screen
+	P3_ApplyTextScale();
 #endif
 }
 
