@@ -16,6 +16,7 @@ VarTrack g_vtP3NoFunMenus;
 VarTrack g_vtP3Cinematics4x3;
 VarTrack g_vtP3UseGotyMenu;
 VarTrack g_vtP3TextScale;
+VarTrack g_vtP3TextSmooth;
 
 void P3_InitVars()
 {
@@ -27,6 +28,7 @@ void P3_InitVars()
 	g_vtP3Cinematics4x3.Init(g_pLTClient, "RestrictCinematicsTo4x3", LTNULL, 0.0f);
 	g_vtP3UseGotyMenu.Init(g_pLTClient, "UseGotyMenu", LTNULL, 1.0f);
 	g_vtP3TextScale.Init(g_pLTClient, "TextScale", LTNULL, 1.0f);
+	g_vtP3TextSmooth.Init(g_pLTClient, "TextSmooth", LTNULL, 1.0f);
 }
 
 // ---------------------------------------------------------------------------
@@ -301,6 +303,12 @@ int P3_TextScale()
 void P3_ApplyTextScale()
 {
 	LithBitmapFont::SetGlobalScale(P3_TextScale());
+	P3_ApplyTextSmooth();
+}
+
+void P3_ApplyTextSmooth()
+{
+	LithBitmapFont::SetGlobalSmooth((int)(g_vtP3TextSmooth.GetFloat(1.0f) + 0.5f));
 }
 
 int P3_TextLen(int n)

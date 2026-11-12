@@ -708,6 +708,11 @@ LTBOOL CInterfaceMgr::PostUpdate()
 
 LTBOOL CInterfaceMgr::Update()
 {
+#ifdef NOLFSRC_MODERN
+	// HD fonts, stage 2: TextSmooth takes effect at once
+	P3_ApplyTextSmooth();
+#endif
+
 	// Update based on the game state...
     LTBOOL bHandled = LTFALSE;
 	switch (m_eGameState)

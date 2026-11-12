@@ -127,11 +127,26 @@ class LithBitmapFont : public LithFont
 		int		LayoutScale()		{ ApplyScale(); return m_bLayoutMetrics ? m_nScale : 1; }
 		int		LayoutHeight()		{ return m_nHeight / LayoutScale(); }
 
+		// HD fonts, stage 2: with smoothing on (TextSmooth, the default), a
+		// font drawn at s > 1 draws from its own image redrawn s times larger
+		// with smooth edges (BuildHD), one to one, rather than stretching
+		// the retail glyphs' pixels. 0 = off (stage 1's pixel-doubled glyphs),
+		// 1 = smooth with sharp edges, 2 = smooth and soft.
+		static void	SetGlobalSmooth(int nSmooth);
+
 	private:
 		void	ApplyScale();
-		void	BlitGlyph(int nX, int nY, LTBOOL bSolid);
+		void	BlitGlyph(int nX, int nY, uint32 nChar, LTBOOL bSolid);
+		void	BuildHD();
+		void	FreeHD();
 
 		static int	s_nScale;
+		static int	s_nSmooth;
+		HSURFACE	m_pFontHD;						// the glyphs at m_nHDScale, smoothed
+		int			m_nHDScale;						// 0: none
+		int			m_nHDSmooth;					// the smoothing it was made with
+		uint32		m_aHDX[LTF_NUM_TOTAL_CHARS];	// each glyph's top-left in it
+		uint32		m_aHDY[LTF_NUM_TOTAL_CHARS];
 		int			m_nScale;						// the scale the metrics below are at
 		uint32		m_aBaseWidths[LTF_NUM_TOTAL_CHARS];	// m_lfOD.pWidths at scale 1
 		uint32		m_nBaseAvgWidth;				// m_nAvgWidth at scale 1

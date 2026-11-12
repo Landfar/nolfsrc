@@ -8,6 +8,9 @@
 //*********************************************************************************
 
 #include "lithbitmapfont.h"
+#ifdef NOLFSRC_MODERN
+#include <math.h>
+#endif
 
 // NOTE: 18/25 functions are byte-identical to the shipped object. The other
 // seven (Init's file helpers, the string measurers and the two _Draw workers)
@@ -57,6 +60,11 @@ LithBitmapFont::LithBitmapFont()
 	m_nBaseAvgWidth = 0;
 	m_bLayoutMetrics = LTFALSE;
 	memset(m_aBaseWidths, 0, sizeof(m_aBaseWidths));
+	m_pFontHD = LTNULL;
+	m_nHDScale = 0;
+	m_nHDSmooth = 0;
+	memset(m_aHDX, 0, sizeof(m_aHDX));
+	memset(m_aHDY, 0, sizeof(m_aHDY));
 #endif
 }
 
@@ -130,6 +138,9 @@ void LithBitmapFont::Free()
 {
 	if (m_pClient)
 	{
+#ifdef NOLFSRC_MODERN
+		FreeHD();
+#endif
 		if (m_pFont)
 		{
 			m_pClient->DeleteSurface(m_pFont);
@@ -321,6 +332,10 @@ void LithBitmapFont::SetDrawData(HSURFACE pDest, char *szString, LITHFONTDRAWDAT
 
 	if (m_pFont)
 		m_pClient->SetSurfaceAlpha(m_pFont, m_lfDD->fAlpha);
+#ifdef NOLFSRC_MODERN
+	if (m_pFontHD)
+		m_pClient->SetSurfaceAlpha(m_pFontHD, m_lfDD->fAlpha);
+#endif
 }
 
 //*********************************************************************************
@@ -1056,7 +1071,7 @@ void LithBitmapFont::_Draw(int nX, int nY, uint32 nIndex1, uint32 nIndex2)
 			m_rRect.right = m_lfOD.pOffsets[nChar+1];
 
 #ifdef NOLFSRC_MODERN
-			BlitGlyph(nX, nY, LTFALSE);
+			BlitGlyph(nX, nY, nChar, LTFALSE);
 #else
 			if (m_bChromaKey)
 			{
@@ -1114,7 +1129,7 @@ void LithBitmapFont::_DrawSolid(int nX, int nY, uint32 nIndex1, uint32 nIndex2)
 			m_rRect.right = m_lfOD.pOffsets[nChar+1];
 
 #ifdef NOLFSRC_MODERN
-			BlitGlyph(nX, nY, LTTRUE);
+			BlitGlyph(nX, nY, nChar, LTTRUE);
 #else
 			m_pClient->DrawSurfaceSolidColor(m_pDest, m_pFont, &m_rRect, nX, nY,
 											 m_hTransColor, m_lfDD->hColor);
@@ -1189,9 +1204,10 @@ LTBOOL LithBitmapFont::ClipFont(LTRect &rcFont)
 #ifdef NOLFSRC_MODERN
 
 //*********************************************************************************
-// HD-fonts stage 1 (see lithbitmapfont.h)
+// HD-fonts stage 1 and 2 (see lithbitmapfont.h)
 
 int LithBitmapFont::s_nScale = 1;
+int LithBitmapFont::s_nSmooth = 1;
 
 void LithBitmapFont::SetGlobalScale(int nScale)
 {
@@ -1200,23 +1216,57 @@ void LithBitmapFont::SetGlobalScale(int nScale)
 	s_nScale = nScale;
 }
 
-// Brings the metrics (glyph advances, average width, height) to the current
-// global scale; the offsets into the font image stay at scale 1.
-void LithBitmapFont::ApplyScale()
+void LithBitmapFont::SetGlobalSmooth(int nSmooth)
 {
-	if (m_nScale == s_nScale && m_nHeight == (int)m_nSurfHeight * m_nScale)
-		return;
-
-	m_nScale = s_nScale;
-	for (int i = 0; i < LTF_NUM_TOTAL_CHARS; i++)
-		m_lfOD.pWidths[i] = m_aBaseWidths[i] * m_nScale;
-	m_nAvgWidth = m_nBaseAvgWidth * m_nScale;
-	m_nHeight = (int)m_nSurfHeight * m_nScale;
+	if (nSmooth < 0) nSmooth = 0;
+	if (nSmooth > 2) nSmooth = 2;
+	s_nSmooth = nSmooth;
 }
 
-// One glyph (m_rRect, in the font image) to (nX, nY), m_nScale times larger.
-void LithBitmapFont::BlitGlyph(int nX, int nY, LTBOOL bSolid)
+// Brings the metrics (glyph advances, average width, height) to the current
+// global scale; the offsets into the font image stay at scale 1. With
+// smoothing, the smoothed image follows the scale too.
+void LithBitmapFont::ApplyScale()
 {
+	if (m_nScale != s_nScale || m_nHeight != (int)m_nSurfHeight * m_nScale)
+	{
+		m_nScale = s_nScale;
+		for (int i = 0; i < LTF_NUM_TOTAL_CHARS; i++)
+			m_lfOD.pWidths[i] = m_aBaseWidths[i] * m_nScale;
+		m_nAvgWidth = m_nBaseAvgWidth * m_nScale;
+		m_nHeight = (int)m_nSurfHeight * m_nScale;
+	}
+
+	int nWant = (s_nSmooth && m_nScale > 1 && m_pFont) ? m_nScale : 0;
+	if (nWant != m_nHDScale || (nWant && s_nSmooth != m_nHDSmooth))
+	{
+		FreeHD();
+		if (nWant)
+			BuildHD();
+	}
+}
+
+// One glyph (m_rRect, in the font image) to (nX, nY), m_nScale times larger:
+// from the smoothed image when there is one, else stretched.
+void LithBitmapFont::BlitGlyph(int nX, int nY, uint32 nChar, LTBOOL bSolid)
+{
+	if (m_pFontHD && m_nHDScale == m_nScale && nChar < LTF_NUM_TOTAL_CHARS)
+	{
+		int s = m_nHDScale;
+		LTRect rcSrc(m_aHDX[nChar], m_aHDY[nChar] + m_rRect.top * s,
+					 m_aHDX[nChar] + (m_rRect.right - m_rRect.left) * s,
+					 m_aHDY[nChar] + m_rRect.bottom * s);
+
+		if (bSolid)
+			m_pClient->DrawSurfaceSolidColor(m_pDest, m_pFontHD, &rcSrc, nX, nY,
+											 m_hTransColor, m_lfDD->hColor);
+		else if (m_bChromaKey)
+			m_pClient->DrawSurfaceToSurfaceTransparent(m_pDest, m_pFontHD, &rcSrc, nX, nY, m_hTransColor);
+		else
+			m_pClient->DrawSurfaceToSurface(m_pDest, m_pFontHD, &rcSrc, nX, nY);
+		return;
+	}
+
 	if (m_nScale <= 1)
 	{
 		if (bSolid)
@@ -1240,5 +1290,231 @@ void LithBitmapFont::BlitGlyph(int nX, int nY, LTBOOL bSolid)
 		m_pClient->ScaleSurfaceToSurfaceTransparent(m_pDest, m_pFont, &rcDest, &m_rRect, m_hTransColor);
 	else
 		m_pClient->ScaleSurfaceToSurface(m_pDest, m_pFont, &rcDest, &m_rRect);
+}
+
+void LithBitmapFont::FreeHD()
+{
+	if (m_pFontHD && m_pClient)
+		m_pClient->DeleteSurface(m_pFontHD);
+	m_pFontHD = LTNULL;
+	m_nHDScale = 0;
+	m_nHDSmooth = 0;
+}
+
+//*********************************************************************************
+// The smoothed image. Each glyph is enlarged on its own (what lies outside
+// its cell counts as background) with a Catmull-Rom cubic. In the sharp mode
+// each result is then pushed towards the darkest or brightest of the 4x4
+// retail pixels it was made from, along an S-curve: flat areas, colours and
+// gradients stay as they were, and an edge becomes a short smooth ramp
+// rather than a blur or a staircase. A font blended onto the screen (most of
+// them) keeps every shade; a colour-keyed font (only the air font) can only
+// have its pixels on or off, so it gets the smoothed outline, unshaded.
+// The glyphs are packed in rows no wider than 2048 pixels (the font images
+// are up to ~1500 wide, eight times that is too wide a texture).
+
+namespace
+{
+	const int HD_MAX_ROW = 2048;
+	const int HD_GAP = 2;
+
+	void HD_Weights(float t, float *w)
+	{
+		float t2 = t * t, t3 = t2 * t;
+		w[0] = (-t3 + 2.0f * t2 - t) * 0.5f;
+		w[1] = (3.0f * t3 - 5.0f * t2 + 2.0f) * 0.5f;
+		w[2] = (-3.0f * t3 + 4.0f * t2 + t) * 0.5f;
+		w[3] = (t3 - t2) * 0.5f;
+	}
+
+	// One channel of a cell (nW x nH, row-major) sampled at the enlarged
+	// pixel (ox, oy) of an nScale enlargement.
+	float HD_Sample(const float *pCell, int nW, int nH, int ox, int oy, int nScale, int nSmooth)
+	{
+		float sx = (ox + 0.5f) / nScale - 0.5f;
+		float sy = (oy + 0.5f) / nScale - 0.5f;
+		int ix = (int)floor(sx), iy = (int)floor(sy);
+		float wx[4], wy[4];
+		HD_Weights(sx - ix, wx);
+		HD_Weights(sy - iy, wy);
+
+		float fSum = 0.0f, fMin = 1.0f, fMax = 0.0f;
+		for (int a = 0; a < 4; a++)
+		{
+			int y = iy - 1 + a;
+			for (int b = 0; b < 4; b++)
+			{
+				int x = ix - 1 + b;
+				float v = (x >= 0 && x < nW && y >= 0 && y < nH) ? pCell[y * nW + x] : 0.0f;
+				fSum += v * wy[a] * wx[b];
+				if (v < fMin) fMin = v;
+				if (v > fMax) fMax = v;
+			}
+		}
+
+		if (fSum < fMin) fSum = fMin;
+		if (fSum > fMax) fSum = fMax;
+		if (nSmooth != 1 || fMax - fMin < 1.0f / 512.0f)
+			return fSum;
+
+		float t = (fSum - fMin) / (fMax - fMin);
+		t = (t - 0.5f) * 1.6f + 0.5f;
+		if (t < 0.0f) t = 0.0f;
+		if (t > 1.0f) t = 1.0f;
+		t = t * t * (3.0f - 2.0f * t);
+		return fMin + t * (fMax - fMin);
+	}
+
+	uint8 HD_Byte(float f)
+	{
+		int n = (int)(f * 255.0f + 0.5f);
+		return (uint8)(n < 0 ? 0 : (n > 255 ? 255 : n));
+	}
+
+	LTBOOL HD_IsKey(HLTCOLOR c, HLTCOLOR hKey)
+	{
+		// within a 16-bit screen's rounding of the key
+		int dr = (int)GETR(c) - (int)GETR(hKey);
+		int dg = (int)GETG(c) - (int)GETG(hKey);
+		int db = (int)GETB(c) - (int)GETB(hKey);
+		return dr >= -8 && dr <= 8 && dg >= -4 && dg <= 4 && db >= -8 && db <= 8;
+	}
+}
+
+void LithBitmapFont::BuildHD()
+{
+	if (!m_pClient || !m_pFont || m_nScale < 2 || !m_nSurfWidth || !m_nSurfHeight)
+		return;
+
+	int s = m_nScale;
+	int nH = (int)m_nSurfHeight;
+	int nCellH = nH * s;
+	int nChar;
+
+	// the atlas: glyphs left to right, a new row when one is full
+	int nRowW = 0, nAtlasW = 0, nAtlasH = nCellH;
+	for (nChar = 0; nChar < LTF_NUM_TOTAL_CHARS; nChar++)
+	{
+		int nW = (int)(m_lfOD.pOffsets[nChar + 1] - m_lfOD.pOffsets[nChar]) * s;
+		if (nW <= 0)
+		{
+			m_aHDX[nChar] = 0;
+			m_aHDY[nChar] = 0;
+			continue;
+		}
+		if (nRowW && nRowW + nW > HD_MAX_ROW)
+		{
+			nRowW = 0;
+			nAtlasH += nCellH + HD_GAP;
+		}
+		m_aHDX[nChar] = nRowW;
+		m_aHDY[nChar] = nAtlasH - nCellH;
+		nRowW += nW + HD_GAP;
+		if (nRowW > nAtlasW)
+			nAtlasW = nRowW;
+	}
+	if (nAtlasW <= 0)
+		return;
+
+	m_pFontHD = m_pClient->CreateSurface(nAtlasW, nAtlasH);
+	if (!m_pFontHD)
+		return;
+	m_nHDScale = s;
+	m_nHDSmooth = s_nSmooth;
+
+	HLTCOLOR hBack = m_bChromaKey ? m_hTransColor : SETRGB(0, 0, 0);
+	m_pClient->FillRect(m_pFontHD, LTNULL, hBack);
+
+	// the widest cell, for the work buffers
+	int nMaxW = 0;
+	for (nChar = 0; nChar < LTF_NUM_TOTAL_CHARS; nChar++)
+	{
+		int nW = (int)(m_lfOD.pOffsets[nChar + 1] - m_lfOD.pOffsets[nChar]);
+		if (nW > nMaxW)
+			nMaxW = nW;
+	}
+	int nCell = nMaxW * nH;
+	float *pR = new float[nCell];
+	float *pG = new float[nCell];
+	float *pB = new float[nCell];
+	float *pM = new float[nCell];	// colour-keyed: 1 where the glyph is
+	HLTCOLOR *pSrc = new HLTCOLOR[nCell];
+
+	for (nChar = 0; nChar < LTF_NUM_TOTAL_CHARS; nChar++)
+	{
+		int x0 = (int)m_lfOD.pOffsets[nChar];
+		int nW = (int)m_lfOD.pOffsets[nChar + 1] - x0;
+		if (nW <= 0)
+			continue;
+
+		int x, y;
+		for (y = 0; y < nH; y++)
+		{
+			for (x = 0; x < nW; x++)
+			{
+				HLTCOLOR c = 0;
+				m_pClient->GetPixel(m_pFont, x0 + x, y, &c);
+				int i = y * nW + x;
+				pSrc[i] = c;
+				LTBOOL bKey = m_bChromaKey && HD_IsKey(c, m_hTransColor);
+				pM[i] = bKey ? 0.0f : 1.0f;
+				pR[i] = bKey ? 0.0f : GETR(c) / 255.0f;
+				pG[i] = bKey ? 0.0f : GETG(c) / 255.0f;
+				pB[i] = bKey ? 0.0f : GETB(c) / 255.0f;
+			}
+		}
+
+		int nOX = (int)m_aHDX[nChar], nOY = (int)m_aHDY[nChar];
+		for (y = 0; y < nCellH; y++)
+		{
+			for (x = 0; x < nW * s; x++)
+			{
+				HLTCOLOR c;
+				if (m_bChromaKey)
+				{
+					if (HD_Sample(pM, nW, nH, x, y, s, 1) < 0.5f)
+						continue;
+					// the colour of the retail pixel it lies in, or of a
+					// neighbour of it that is part of the glyph
+					int sx = x / s, sy = y / s;
+					c = pSrc[sy * nW + sx];
+					if (HD_IsKey(c, m_hTransColor))
+					{
+						int dx = ((x % s) * 2 < s) ? -1 : 1;
+						int dy = ((y % s) * 2 < s) ? -1 : 1;
+						int aTry[3][2] = { { sx + dx, sy }, { sx, sy + dy }, { sx + dx, sy + dy } };
+						for (int k = 0; k < 3; k++)
+						{
+							int tx = aTry[k][0], ty = aTry[k][1];
+							if (tx >= 0 && tx < nW && ty >= 0 && ty < nH &&
+								!HD_IsKey(pSrc[ty * nW + tx], m_hTransColor))
+							{
+								c = pSrc[ty * nW + tx];
+								break;
+							}
+						}
+						if (HD_IsKey(c, m_hTransColor))
+							continue;
+					}
+				}
+				else
+				{
+					uint8 r = HD_Byte(HD_Sample(pR, nW, nH, x, y, s, s_nSmooth));
+					uint8 g = HD_Byte(HD_Sample(pG, nW, nH, x, y, s, s_nSmooth));
+					uint8 b = HD_Byte(HD_Sample(pB, nW, nH, x, y, s, s_nSmooth));
+					if (!r && !g && !b)
+						continue;
+					c = SETRGB(r, g, b);
+				}
+				m_pClient->SetPixel(m_pFontHD, nOX + x, nOY + y, c);
+			}
+		}
+	}
+
+	delete[] pR;
+	delete[] pG;
+	delete[] pB;
+	delete[] pM;
+	delete[] pSrc;
 }
 #endif
