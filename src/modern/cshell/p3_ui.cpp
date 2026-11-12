@@ -371,7 +371,9 @@ void P3_DrawFramerate(HSURFACE hScreen)
 	sprintf(szText, "%.0f fps", s_fFramerate);
 
 	int x = 8;
-	int y = (int)g_pInterfaceResMgr->GetScreenHeight() - pFont->GetHeight() - 8;
+	// the help font measures in layout units: its height on screen is
+	// P3_TextLen of it (HD fonts)
+	int y = (int)g_pInterfaceResMgr->GetScreenHeight() - P3_TextLen(pFont->GetHeight()) - 8;
 	pFont->Draw(szText, hScreen, x + 1, y + 1, LTF_JUSTIFY_LEFT, kBlack);
 	pFont->Draw(szText, hScreen, x, y, LTF_JUSTIFY_LEFT, kWhite);
 }
