@@ -5,6 +5,9 @@
 #include "InterfaceMgr.h"
 #include "GameClientShell.h"
 #include "SoundMgr.h"
+#ifdef NOLFSRC_MODERN
+#include "cshell/p3_ui.h"
+#endif
 extern CGameClientShell* g_pGameClientShell;
 
 // ----------------------------------------------------------------------- //
@@ -63,10 +66,20 @@ LTIntPt CLTTextWnd::SetText(const char *szText, int nWidth)
 		pt = m_pFont->GetTextExtents(hStr);
 	}
 
+    g_pLTClient->FreeString(hStr);
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the (medium) font measures and wraps in layout units, but
+	// the window is in pixels, at the glyph scale
+	m_lfdd.dwFormatWidth = pt.x;
+	pt.x = P3_TextLen(pt.x);
+	pt.y = P3_TextLen(pt.y);
 	m_nWidth = pt.x;
 	m_nHeight = pt.y;
-    g_pLTClient->FreeString(hStr);
+#else
+	m_nWidth = pt.x;
+	m_nHeight = pt.y;
 	m_lfdd.dwFormatWidth = m_nWidth;
+#endif
 	m_lfdd.dwFlags |= LTF_DRAW_FORMATTED;
 
 	// Term the prev string just in case we drew this string last time timed...
@@ -97,7 +110,11 @@ BOOL CLTTextWnd::DrawToSurface(HSURFACE hSurfDest)
 	else if (!m_bSelectable)
 		hColor = kGray;
 
+#ifdef NOLFSRC_MODERN
+	m_pFont->DrawFormat((char *)(LPCSTR)m_csText,hSurfDest,GetWindowLeft(),GetWindowTop(),m_lfdd.dwFormatWidth,hColor);
+#else
 	m_pFont->DrawFormat((char *)(LPCSTR)m_csText,hSurfDest,GetWindowLeft(),GetWindowTop(),m_nWidth,hColor);
+#endif
 
 	return TRUE;
 }

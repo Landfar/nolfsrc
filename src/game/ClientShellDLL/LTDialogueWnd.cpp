@@ -17,6 +17,9 @@
 #include "InterfaceMgr.h"
 #include "InterfaceResMgr.h"
 #include "GameClientShell.h"
+#ifdef NOLFSRC_MODERN
+#include "cshell/p3_ui.h"
+#endif
 extern CGameClientShell* g_pGameClientShell;
 
 
@@ -44,6 +47,12 @@ BOOL CLTDialogueWnd::Init(DIALOGUEWNDCREATESTRUCT* pcs)
 	// Simple vars -- Ya gotta specify a width/height since this is scaleable, bunghole. :)
 	m_nWidth = pcs->nWidth;
 	m_nHeight = pcs->nHeight;
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the layout's size, which the window takes at the glyph
+	// scale whenever it is shown (ShowWindow)
+	m_nBaseWidth = pcs->nWidth;
+	m_nBaseHeight = pcs->nHeight;
+#endif
 	m_pFont = pcs->pFont;
 	m_bFrame = pcs->bFrame;
 
@@ -172,9 +181,17 @@ BOOL CLTDialogueWnd::DrawToSurface(HSURFACE hSurfDest)
 	{
         LTIntPt ptPos = g_pLayoutMgr->GetDialogueTextOffset();
 		int nTop;
+#ifdef NOLFSRC_MODERN
+		ptPos.x = P3_TextLen(ptPos.x);
+		ptPos.y = P3_TextLen(ptPos.y);
+		if(m_lfdd.dwFlags & LTF_TIMED_SCROLL)
+			nTop = GetWindowTop() + m_nHeight - ptPos.y - P3_TextLen(m_pFont->GetHeight());
+		else
+#else
 		if(m_lfdd.dwFlags & LTF_TIMED_SCROLL)
 			nTop = GetWindowTop() + m_nHeight - ptPos.y - m_pFont->GetHeight();
 		else
+#endif
 			nTop = GetWindowTop() + ptPos.y;
 
 		g_pLTClient->SetOptimized2DBlend(LTSURFACEBLEND_ADD);
@@ -216,6 +233,15 @@ BOOL CLTDialogueWnd::SetPic(char *szBitmap)
 // ----------------------------------------------------------------------- //
 BOOL CLTDialogueWnd::ShowWindow(BOOL bShow, BOOL bPlaySound, BOOL bAnimate)
 {
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the layout's size at the glyph scale (not while it opens or
+	// closes, which changes the height)
+	if(bShow && !m_bOpening && !m_bClosing)
+	{
+		m_nWidth = P3_TextLen(m_nBaseWidth);
+		m_nHeight = P3_TextLen(m_nBaseHeight);
+	}
+#endif
 		// Center us
 	MoveWindow((g_pGameClientShell->GetScreenWidth()-m_nWidth)/2,m_yPos);
 	m_pFont = g_pInterfaceResMgr->GetMediumFont();
@@ -410,7 +436,12 @@ BOOL CLTDialogueWnd::DisplayText(char *szText, char *szAvatar, BOOL bStayOpen, c
 
 	// Set the format width
     LTIntPt ptPos = g_pLayoutMgr->GetDialogueTextOffset();
+#ifdef NOLFSRC_MODERN
+	// in the font's layout units
+	m_lfdd.dwFormatWidth = m_nBaseWidth - (ptPos.x * 2);
+#else
 	m_lfdd.dwFormatWidth = m_nWidth - (ptPos.x * 2);
+#endif
 	m_lfdd.dwFlags = LTF_DRAW_FORMATTED;
 
 	if(!szText)
@@ -436,7 +467,11 @@ BOOL CLTDialogueWnd::DisplayText(char *szText, char *szAvatar, BOOL bStayOpen, c
         LTIntPt pt = m_pFont->GetTextExtentsFormat(hStr,m_lfdd.dwFormatWidth);
         g_pLTClient->FreeString(hStr);
         hStr = NULL;
+#ifdef NOLFSRC_MODERN
+		if(pt.y > (m_nBaseHeight - (ptPos.y * 2)))
+#else
 		if(pt.y > (m_nHeight - (ptPos.y * 2)))
+#endif
 		{
 			// It's more than we can display all at once so scroll it.
 			m_lfdd.dwFlags |= LTF_TIMED_SCROLL | LTF_EXTRA_LOCKLAST;

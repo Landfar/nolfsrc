@@ -98,6 +98,10 @@ protected:
 	BOOL		m_bMore;
 	CString		m_csDecisions;
 	CLTDecisionWnd	m_DecisionWnd;
+#ifdef NOLFSRC_MODERN
+	int			m_nBaseWidth;		// HD fonts: the layout's size (Init)
+	int			m_nBaseHeight;
+#endif
 	CRect		m_rcFrame;
 	CRect		m_rcTotal;
 	BOOL		m_bImmediateDecisions;
@@ -122,6 +126,10 @@ inline CLTDialogueWnd::CLTDialogueWnd()
 	m_bMore = FALSE;
 	m_bImmediateDecisions = FALSE;
 	m_bFrame = FALSE;
+#ifdef NOLFSRC_MODERN
+	m_nBaseWidth = 0;
+	m_nBaseHeight = 0;
+#endif
 }
 
 inline void CLTDialogueWnd::DoneShowing(uint8 bySelection, DWORD dwSelection)

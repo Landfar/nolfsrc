@@ -15,6 +15,9 @@
 #include "LTWndMessages.h"
 
 #include "GameClientShell.h"
+#ifdef NOLFSRC_MODERN
+#include "cshell/p3_ui.h"
+#endif
 extern CGameClientShell* g_pGameClientShell;
 
 BOOL CLTDecisionWnd::Init(DECISIONWNDCREATESTRUCT *pcs)
@@ -284,6 +287,11 @@ BOOL CLTDecisionWnd::DisplayText(CStringArray *pcollDecisions, CLTWnd* pWnd, BOO
 
 
     LTIntPt ptPos = g_pLayoutMgr->GetDecisionTextOffset();
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the text windows are at the glyph scale, the gaps too
+	ptPos.x = P3_TextLen(ptPos.x);
+	ptPos.y = P3_TextLen(ptPos.y);
+#endif
 	for(i=0;((i<pcollDecisions->GetSize()) && (i<MAX_DECISIONS));i++)
 	{
 		if(pcollDecisions->GetAt(i).IsEmpty())
@@ -300,7 +308,11 @@ BOOL CLTDecisionWnd::DisplayText(CStringArray *pcollDecisions, CLTWnd* pWnd, BOO
 
 		// If we've got another decision, add space inbetween
 		if(i+1 < pcollDecisions->GetSize())
+#ifdef NOLFSRC_MODERN
+			ptMax.y += P3_TextLen(g_pLayoutMgr->GetDecisionSpacing());
+#else
 			ptMax.y += g_pLayoutMgr->GetDecisionSpacing();
+#endif
 	}
 
 	// Set our number of decisions

@@ -15,6 +15,9 @@
 #include "LTWndMessages.h"
 
 #include "GameClientShell.h"
+#ifdef NOLFSRC_MODERN
+#include "cshell/p3_ui.h"
+#endif
 extern CGameClientShell* g_pGameClientShell;
 
 BOOL CLTMenuWnd::Init(MENUWNDCREATESTRUCT *pcs)
@@ -296,9 +299,18 @@ void CLTMenuWnd::AddItem(const char *szText, uint8 byCommand)
 
 
     LTIntPt ptPos = g_pLayoutMgr->GetMenuTextOffset();
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the item windows are at the glyph scale, the gaps too
+	ptPos.x = P3_TextLen(ptPos.x);
+	ptPos.y = P3_TextLen(ptPos.y);
+
+	if (m_nNumItems > 0)
+		m_curSz.y += P3_TextLen(g_pLayoutMgr->GetMenuSpacing());
+#else
 
 	if (m_nNumItems > 0)
 		m_curSz.y += g_pLayoutMgr->GetMenuSpacing();
+#endif
 
 	// Set the window position
     LTIntPt ptCur = m_ItemWnds[m_nNumItems].SetText(szText,MENUWND_MAX_WIDTH);
@@ -347,6 +359,10 @@ BOOL CLTMenuWnd::Open()
 
 
     LTIntPt ptPos = g_pLayoutMgr->GetMenuTextOffset();
+#ifdef NOLFSRC_MODERN
+	ptPos.x = P3_TextLen(ptPos.x);
+	ptPos.y = P3_TextLen(ptPos.y);
+#endif
 
 	// Set our size based on the extents of the text
 	int nWidth = m_curSz.x + ptPos.x + ptPos.x;

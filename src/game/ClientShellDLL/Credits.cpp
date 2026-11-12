@@ -19,6 +19,9 @@
 #include "Credits.h"
 #include <stdio.h>
 #include "ClientRes.h"
+#ifdef NOLFSRC_MODERN
+#include "cshell/p3_ui.h"
+#endif
 
 // Macros...
 
@@ -226,9 +229,18 @@ void CCredit::CreateSurface()
 	else
 		pFont = g_pInterfaceResMgr->GetMsgForeFont();
 
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the title font measures in layout units but draws at the
+	// glyph scale; the surface is in pixels
+	int nK = m_bBig ? P3_TextScale() : 1;
+#endif
 	for (i = 0; i < m_cStrings; i++)
 	{
 		strSz = pFont->GetTextExtents(m_aStrings[i]);
+#ifdef NOLFSRC_MODERN
+		strSz.x *= nK;
+		strSz.y *= nK;
+#endif
 		sz.y += strSz.y;
 		sz.x = Max(sz.x,strSz.x);
 	}
@@ -270,7 +282,11 @@ void CCredit::CreateSurface()
 	for (i = 0; i < m_cStrings; i++)
 	{
 		pFont->Draw(m_aStrings[i], m_hSurface,x,y,nJustify,kWhite);
+#ifdef NOLFSRC_MODERN
+		y += pFont->GetHeight() * nK;
+#else
 		y += pFont->GetHeight();
+#endif
 	}
 
 	g_pLTClient->OptimizeSurface(m_hSurface,backColor);
