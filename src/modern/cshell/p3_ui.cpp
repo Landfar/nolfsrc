@@ -107,6 +107,13 @@ LTBOOL P3_PointOnCtrl(CLTGUICtrl *pCtrl, int x, int y, LTBOOL bRow)
 		nWidth = P3_MenuLen(nWidth);
 		nHeight = P3_MenuLen(nHeight);
 	}
+	// HD fonts: any other control's size is its text's, in layout units,
+	// and its text is drawn at the glyph scale
+	else
+	{
+		nWidth = P3_TextLen(nWidth);
+		nHeight = P3_TextLen(nHeight);
+	}
 
 	return (x >= nLeft && x <= nLeft + nWidth &&
 			y >= nTop && y <= nTop + nHeight);
@@ -294,6 +301,11 @@ int P3_TextScale()
 void P3_ApplyTextScale()
 {
 	LithBitmapFont::SetGlobalScale(P3_TextScale());
+}
+
+int P3_TextLen(int n)
+{
+	return n * P3_TextScale();
 }
 
 void P3_DrawScaled(HSURFACE hDest, HSURFACE hSrc, int x, int y, float fScale, HLTCOLOR hTrans)

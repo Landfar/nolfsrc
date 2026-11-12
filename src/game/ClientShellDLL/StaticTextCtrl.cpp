@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "ltguimgr.h"
 #include "StaticTextCtrl.h"
+#ifdef NOLFSRC_MODERN
+// HD fonts: the text's surface at the glyph scale
+#include "cshell/p3_ui.h"
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -255,11 +259,21 @@ void CStaticTextCtrl::CreateSurface()
 	if (m_hSurface)
 		m_pClientDE->GetSurfaceDims(m_hSurface, &dwWidth, &dwHeight);
 
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the text (measured in layout units) is drawn at the glyph scale
+	uint32 dwTextWidth = (uint32)P3_TextLen((int)m_dwWidth);
+	uint32 dwTextHeight = (uint32)P3_TextLen((int)m_dwHeight);
+	if (dwWidth < dwTextWidth || dwHeight < dwTextHeight)
+	{
+		dwWidth = Max(dwWidth,dwTextWidth);
+		dwHeight = Max(dwHeight,dwTextHeight);
+#else
 	//if the surface dims are less than the text extents, create a new surface
 	if (dwWidth < m_dwWidth || dwHeight < m_dwHeight)
 	{
 		dwWidth = Max(dwWidth,m_dwWidth);
 		dwHeight = Max(dwHeight,m_dwHeight);
+#endif
 		if (m_hSurface)
 			m_pClientDE->DeleteSurface(m_hSurface);
 		m_hSurface = m_pClientDE->CreateSurface(dwWidth,dwHeight);

@@ -165,8 +165,14 @@ LTBOOL CBaseFolder::Init(int nFolderID)
 
 	int nWidth = m_HelpRect.right - m_HelpRect.left;
 	int nHeight = m_HelpRect.bottom - m_HelpRect.top;
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the help text is drawn at the glyph scale
+	if (!m_hHelpSurf)
+		m_hHelpSurf = g_pLTClient->CreateSurface((uint32)P3_TextLen(nWidth),(uint32)P3_TextLen(nHeight));
+#else
 	if (!m_hHelpSurf)
 		m_hHelpSurf = g_pLTClient->CreateSurface((uint32)nWidth,(uint32)nHeight);
+#endif
 
 	m_bInit=TRUE;
     return LTTRUE;
@@ -2579,7 +2585,11 @@ void CBaseFolder::UpdateHelpText()
 
 		int nWidth = m_HelpRect.right - m_HelpRect.left;
 		int nHeight = m_HelpRect.bottom - m_HelpRect.top;
+#ifdef NOLFSRC_MODERN
+        LTRect rect(0,0,P3_TextLen(nWidth),P3_TextLen(nHeight));
+#else
         LTRect rect(0,0,nWidth,nHeight);
+#endif
         g_pLTClient->FillRect(m_hHelpSurf,&rect,kBlack);
 
 		if (m_dwCurrHelpID)

@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "MessageBoxCtrl.h"
 #include "vkdefs.h"
+#ifdef NOLFSRC_MODERN
+// HD fonts: the box and its text at the glyph scale
+#include "cshell/p3_ui.h"
+#endif
 
 #define MB_EDGESPACE	20	// The space between the side edges of the message box and the text
 #define MB_NOSELECT	-1
@@ -129,13 +133,29 @@ void CMessageBoxCtrl::Render(HSURFACE hDestSurf)
 
 	if (!m_pFont || !m_hText) return;
 
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the box (laid out in the retail game's pixels, like its
+	// font's metrics) is drawn at the glyph scale
+	int nMBWidth = P3_TextLen(GetWidth());
+	int nMBHeight = P3_TextLen(GetHeight());
+
+	if (m_fScale > 1.0f || P3_TextScale() > 1)
+#else
 	int nMBWidth = GetWidth();
 	int nMBHeight = GetHeight();
 
 	if (m_fScale > 1.0f)
+#endif
 	{
 		LTRect dstRect(m_screenPos.x, m_screenPos.y,m_screenPos.x+nMBWidth, m_screenPos.y+nMBHeight);
+#ifdef NOLFSRC_MODERN
+		if (m_fScale > 1.0f)
+			m_pClientDE->ScaleSurfaceToSurface(hDestSurf, m_hBackgroundSurf,&dstRect,LTNULL);
+		else
+			m_pClientDE->ScaleSurfaceToSurfaceTransparent(hDestSurf, m_hBackgroundSurf,&dstRect,LTNULL,m_hTransColor);
+#else
 		m_pClientDE->ScaleSurfaceToSurface(hDestSurf, m_hBackgroundSurf,&dstRect,LTNULL);
+#endif
 	}
 	else
 	{
@@ -148,12 +168,21 @@ void CMessageBoxCtrl::Render(HSURFACE hDestSurf)
 	lfDD.dwFlags = LTF_DRAW_NORMAL;
 
 	// Center the text in the box
+#ifdef NOLFSRC_MODERN
+	int nWidth=GetWidth()-(MB_EDGESPACE*2);
+    LTIntPt size=m_pFont->GetTextExtentsFormat(m_hText, nWidth);
+
+	int x,y;
+	x=(m_screenPos.x+(nMBWidth/2))-(P3_TextLen(size.x)/2);
+	y=(m_screenPos.y+P3_TextLen(MB_EDGESPACE));
+#else
 	int nWidth=nMBWidth-(MB_EDGESPACE*2);
     LTIntPt size=m_pFont->GetTextExtentsFormat(m_hText, nWidth);
 
 	int x,y;
 	x=(m_screenPos.x+(nMBWidth/2))-(size.x/2);
 	y=(m_screenPos.y+MB_EDGESPACE);
+#endif
 
 	m_pFont->DrawFormat(m_hText, hDestSurf, x, y, nWidth, m_textColor);
 
@@ -167,8 +196,13 @@ void CMessageBoxCtrl::Render(HSURFACE hDestSurf)
 		{
 			// The bounding rectangle for the text relative to the left side of the message box
             LTRect rcText=GetTextButtonRect(i);
+#ifdef NOLFSRC_MODERN
+			int x = m_screenPos.x+P3_TextLen(rcText.left);
+			int y = m_screenPos.y+P3_TextLen(rcText.top);
+#else
 			int x = m_screenPos.x+rcText.left;
 			int y = m_screenPos.y+rcText.top;
+#endif
 			// Render the text
             HLTCOLOR hColor = m_textButtonColor;;
 			if ((int)i == m_nSelection)
@@ -199,7 +233,11 @@ void CMessageBoxCtrl::SetPos(int xPos, int yPos, HSURFACE hDestSurf)
 		// Center the message box if specified
 		if (xPos == LTGUI_MB_CENTER)
 		{
+#ifdef NOLFSRC_MODERN
+			m_screenPos.x=(dwScreenWidth/2)-(P3_TextLen(GetWidth())/2);
+#else
 			m_screenPos.x=(dwScreenWidth/2)-(GetWidth()/2);
+#endif
 		}
 		else
 		{
@@ -208,7 +246,11 @@ void CMessageBoxCtrl::SetPos(int xPos, int yPos, HSURFACE hDestSurf)
 
 		if (yPos == LTGUI_MB_CENTER)
 		{
+#ifdef NOLFSRC_MODERN
+			m_screenPos.y=(dwScreenHeight/2)-(P3_TextLen(GetHeight())/2);
+#else
 			m_screenPos.y=(dwScreenHeight/2)-(GetHeight()/2);
+#endif
 		}
 		else
 		{
@@ -550,6 +592,10 @@ int	CMessageBoxCtrl::GetButtonFromPoint(int x, int y)
 	{
 		// The bounding rectangle for the text relative to the left side of the message box
         LTRect rcText=GetTextButtonRect(i);
+#ifdef NOLFSRC_MODERN
+		rcText = LTRect(P3_TextLen(rcText.left), P3_TextLen(rcText.top),
+						P3_TextLen(rcText.right), P3_TextLen(rcText.bottom));
+#endif
 
 		// Check to see if the mouse click is in the button
 		if (x >= m_screenPos.x+rcText.left && y >= m_screenPos.y+rcText.top &&

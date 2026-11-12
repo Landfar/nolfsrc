@@ -116,7 +116,12 @@ LTBOOL CFolderDisplay::Build()
 	BuildRendererArray();
 
 	// Add the "renderer" option
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the label columns at the glyph scale
+    m_pRendererCtrl = AddCycleItem(IDS_DISPLAY_RENDERER,IDS_HELP_RENDERER,P3_TextLen(100),25,LTNULL);
+#else
     m_pRendererCtrl = AddCycleItem(IDS_DISPLAY_RENDERER,IDS_HELP_RENDERER,100,25,LTNULL);
+#endif
 
 	unsigned int i;
 	for (i=0; i < m_rendererArray.GetSize(); i++)
@@ -134,7 +139,11 @@ LTBOOL CFolderDisplay::Build()
 //	}
 
 	// Add the "resolution" control
+#ifdef NOLFSRC_MODERN
+    m_pResolutionCtrl = AddCycleItem(IDS_DISPLAY_RESOLUTION,IDS_HELP_RESOLUTION,P3_TextLen(150),25,LTNULL, LTFALSE);
+#else
     m_pResolutionCtrl = AddCycleItem(IDS_DISPLAY_RESOLUTION,IDS_HELP_RESOLUTION,150,25,LTNULL, LTFALSE);
+#endif
 
 	// Setup the resolution control based on the currently selected renderer
 	SetupResolutionCtrl();
@@ -143,23 +152,31 @@ LTBOOL CFolderDisplay::Build()
 	// M-P1-06, M-P1-22: the window mode: full screen, a window, or a
 	// borderless window (at the desktop's resolution, so the resolution
 	// list is greyed out for it)
-	m_pP1WindowModeCtrl = AddCycleItem(IDS_P1_WINDOWMODE,IDS_P1_HELP_WINDOWMODE,175,25,&m_nP1WindowMode);
+	m_pP1WindowModeCtrl = AddCycleItem(IDS_P1_WINDOWMODE,IDS_P1_HELP_WINDOWMODE,P3_TextLen(175),25,&m_nP1WindowMode);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_FULLSCREEN);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_WINDOWED);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_BORDERLESS);
 	m_pP1WindowModeCtrl->NotifyOnChange(FOLDER_CMD_UPDATE,this);
 #endif
+#ifdef NOLFSRC_MODERN
+	CToggleCtrl *pToggle = AddToggle(IDS_DISPLAY_TEXTURE,IDS_HELP_TEXTUREDEPTH,P3_TextLen(175),&m_bTexture32);
+#else
 	CToggleCtrl *pToggle = AddToggle(IDS_DISPLAY_TEXTURE,IDS_HELP_TEXTUREDEPTH,175,&m_bTexture32);
+#endif
 	pToggle->SetOnString(IDS_DISPLAY_32BIT);
 	pToggle->SetOffString(IDS_DISPLAY_16BIT);
 
+#ifdef NOLFSRC_MODERN
+	m_pHardwareCursor = AddToggle(IDS_HARDWARE_CURSOR,IDS_HELP_HARDWARE_CURSOR,P3_TextLen(175),&m_bHardwareCursor);
+#else
 	m_pHardwareCursor = AddToggle(IDS_HARDWARE_CURSOR,IDS_HELP_HARDWARE_CURSOR,175,&m_bHardwareCursor);
+#endif
 	m_pHardwareCursor->SetOnString(IDS_ON);
 	m_pHardwareCursor->SetOffString(IDS_OFF);
 	
 #ifdef NOLFSRC_MODERN
 	// M-P1-10: Intel graphics fix, for d3d7.ren only (P1UpdateIntelFix)
-	m_pP1IntelFixCtrl = AddToggle(IDS_P1_INTELFIX,IDS_P1_HELP_INTELFIX,175,&m_bP1IntelFix);
+	m_pP1IntelFixCtrl = AddToggle(IDS_P1_INTELFIX,IDS_P1_HELP_INTELFIX,P3_TextLen(175),&m_bP1IntelFix);
 	m_pP1IntelFixCtrl->SetOnString(IDS_ON);
 	m_pP1IntelFixCtrl->SetOffString(IDS_OFF);
 #endif

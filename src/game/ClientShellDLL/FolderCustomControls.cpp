@@ -102,6 +102,12 @@ LTBOOL CFolderCustomControls::Build()
 	m_nActionWidth = g_pLayoutMgr->GetFolderCustomInt(FOLDER_ID_CUST_CONTROLS,"ActionWidth");
 	m_nBufferWidth = g_pLayoutMgr->GetFolderCustomInt(FOLDER_ID_CUST_CONTROLS,"BufferWidth");
 	m_nEqualsWidth = g_pLayoutMgr->GetFolderCustomInt(FOLDER_ID_CUST_CONTROLS,"EqualsWidth");
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the columns at the glyph scale
+	m_nActionWidth = P3_TextLen(m_nActionWidth);
+	m_nBufferWidth = P3_TextLen(m_nBufferWidth);
+	m_nEqualsWidth = P3_TextLen(m_nEqualsWidth);
+#endif
 
 
 	HSTRING hStr = g_pLTClient->FormatString(IDS_UP);
@@ -279,7 +285,11 @@ void CFolderCustomControls::InitColumns(int nFilter,int nFirstEntry,int nEntries
 		pCtrl->AddColumn(hEmpty, m_nEqualsWidth, LTF_JUSTIFY_LEFT);
 
 		// The column that contains the key which is assigned to the control!
+#ifdef NOLFSRC_MODERN
+		pCtrl->AddColumn(IDS_CONTROL_UNASSIGNED, P3_TextLen(100), LTF_JUSTIFY_LEFT);
+#else
 		pCtrl->AddColumn(IDS_CONTROL_UNASSIGNED, 100, LTF_JUSTIFY_LEFT);
+#endif
 
 		pCtrl->SetParam1(1+nFirstEntry+i);
 
