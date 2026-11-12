@@ -22,6 +22,7 @@ protected:
 	LTBOOL	m_bShowFramerate;	// ShowFramerate
 	LTBOOL	m_bCinematics4x3;	// RestrictCinematicsTo4x3
 	LTBOOL	m_bGotyMenu;		// UseGotyMenu
+	int		m_nFont;			// TextSmooth / TextScale, as its choice (HD fonts)
 };
 
 #endif // P3_FOLDERINTERFACE_H

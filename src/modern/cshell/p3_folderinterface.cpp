@@ -1,7 +1,7 @@
 // p3_folderinterface.cpp -- the Interface options folder (MODERN.md,
 // M-P3-13): the HUD's size (M-P3-12), the frame-rate cap (M-P1-01's
 // FramerateLimit, M-P1-25), the frame-rate counter (M-P3-14), the cutscenes' framing
-// (M-P3-08) and the main menu's art (M-P3-10).
+// (M-P3-08), the main menu's art (M-P3-10) and the text font (HD fonts).
 
 #include "stdafx.h"
 #include "FolderMgr.h"
@@ -23,6 +23,11 @@ namespace
 	// M-P1-25: the frame-rate limit's choices, FramerateLimit's values
 	const int s_aFramerates[] = { 60, 120, 144, 240, 0 };
 	const int s_nFramerates = sizeof(s_aFramerates) / sizeof(s_aFramerates[0]);
+
+	// HD fonts: the text font's choices, TextSmooth's values; the last,
+	// the original size, is TextScale 0
+	const int s_aFontSmooth[] = { 1, 3, 2, 0 };
+	const int s_nFontRetail = sizeof(s_aFontSmooth) / sizeof(s_aFontSmooth[0]);
 }
 
 CFolderInterface::CFolderInterface()
@@ -32,6 +37,7 @@ CFolderInterface::CFolderInterface()
 	m_bShowFramerate = LTFALSE;
 	m_bCinematics4x3 = LTFALSE;
 	m_bGotyMenu = LTTRUE;
+	m_nFont = 0;
 }
 
 CFolderInterface::~CFolderInterface()
@@ -76,6 +82,15 @@ LTBOOL CFolderInterface::Build()
 	pToggle->SetOnString(IDS_P3_MENU_GOTY);
 	pToggle->SetOffString(IDS_P3_MENU_ORIGINAL);
 
+	// HD fonts: the HD font, the retail glyphs smoothed (sharp or soft) or
+	// enlarged, or the retail size
+	CCycleCtrl *pFont = AddCycleItem(IDS_P3_FONT, IDS_P3_HELP_FONT, kGap, 25, &m_nFont);
+	pFont->AddString(IDS_P3_FONT_HD);
+	pFont->AddString(IDS_P3_FONT_SHARP);
+	pFont->AddString(IDS_P3_FONT_SOFT);
+	pFont->AddString(IDS_P3_FONT_PIXELS);
+	pFont->AddString(IDS_P3_FONT_RETAIL);
+
 	// Make sure to call the base class
 	if (!CBaseFolder::Build()) return LTFALSE;
 
@@ -99,6 +114,17 @@ void CFolderInterface::OnFocus(LTBOOL bFocus)
 		m_bShowFramerate = (g_vtP3ShowFramerate.GetFloat() != 0.0f);
 		m_bCinematics4x3 = (g_vtP3Cinematics4x3.GetFloat() != 0.0f);
 		m_bGotyMenu = (g_vtP3UseGotyMenu.GetFloat(1.0f) != 0.0f);
+		if (g_vtP3TextScale.GetFloat(1.0f) <= 0.0f)
+			m_nFont = s_nFontRetail;
+		else
+		{
+			int nSmooth = (int)(g_vtP3TextSmooth.GetFloat(1.0f) + 0.5f);
+			for (m_nFont = 0; m_nFont < s_nFontRetail - 1; m_nFont++)
+			{
+				if (s_aFontSmooth[m_nFont] == nSmooth)
+					break;
+			}
+		}
 
 		UpdateData(LTFALSE);
 	}
@@ -111,6 +137,19 @@ void CFolderInterface::OnFocus(LTBOOL bFocus)
 		WriteConsoleInt("ShowFramerate", m_bShowFramerate ? 1 : 0);
 		WriteConsoleInt("RestrictCinematicsTo4x3", m_bCinematics4x3 ? 1 : 0);
 		WriteConsoleInt("UseGotyMenu", m_bGotyMenu ? 1 : 0);
+
+		// the font: a TextScale other than 0 and 1 set in the console stays;
+		// a new TextScale takes effect at the next start (the menus are
+		// laid out for the old one), TextSmooth at once
+		LTBOOL bRetail = (g_vtP3TextScale.GetFloat(1.0f) <= 0.0f);
+		if (m_nFont == s_nFontRetail)
+			WriteConsoleInt("TextScale", 0);
+		else
+		{
+			if (bRetail)
+				WriteConsoleInt("TextScale", 1);
+			WriteConsoleInt("TextSmooth", s_aFontSmooth[m_nFont]);
+		}
 
 		g_pLTClient->WriteConfigFile("autoexec.cfg");
 	}

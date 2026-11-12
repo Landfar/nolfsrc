@@ -22,6 +22,8 @@ extern VarTrack g_vtP3ShowFramerate;    // ShowFramerate
 extern VarTrack g_vtP3NoFunMenus;       // NoFunMenus
 extern VarTrack g_vtP3Cinematics4x3;    // RestrictCinematicsTo4x3
 extern VarTrack g_vtP3UseGotyMenu;      // UseGotyMenu
+extern VarTrack g_vtP3TextScale;        // TextScale (HD fonts)
+extern VarTrack g_vtP3TextSmooth;       // TextSmooth (HD fonts)
 
 void        P3_InitVars();
 
@@ -97,8 +99,9 @@ float       P3_HUDScale();
 // every bitmap font (LithBitmapFont::SetGlobalScale). Called on each mode change.
 int         P3_TextScale();
 void        P3_ApplyTextScale();
-// HD fonts, stage 2: TextSmooth (1 = the default, smooth glyphs with sharp
-// edges; 2 = smooth and soft; 0 = stage 1's enlarged retail pixels), read
+// HD fonts, stage 2: TextSmooth (1 = the default, the HD font images;
+// 2 = the retail glyphs smoothed, soft; 3 = the retail glyphs smoothed,
+// sharp; 0 = stage 1's enlarged retail pixels), read
 // every frame (LithBitmapFont::SetGlobalSmooth).
 void        P3_ApplyTextSmooth();
 // A length beside menu text (a column, a gap, a text surface), given in the

@@ -23,5 +23,13 @@
 #define IDS_P3_HELP_MENU_STYLE			31216
 #define IDS_P3_MENU_GOTY				31217
 #define IDS_P3_MENU_ORIGINAL			31218
+// HD fonts: the menu text's look
+#define IDS_P3_FONT						31219
+#define IDS_P3_HELP_FONT				31220
+#define IDS_P3_FONT_HD					31221
+#define IDS_P3_FONT_SHARP				31222
+#define IDS_P3_FONT_SOFT				31223
+#define IDS_P3_FONT_PIXELS				31224
+#define IDS_P3_FONT_RETAIL				31225
 
 #endif // P3_STRINGS_H

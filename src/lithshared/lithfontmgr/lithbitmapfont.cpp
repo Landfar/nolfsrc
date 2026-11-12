@@ -1221,7 +1221,7 @@ void LithBitmapFont::SetGlobalScale(int nScale)
 void LithBitmapFont::SetGlobalSmooth(int nSmooth)
 {
 	if (nSmooth < 0) nSmooth = 0;
-	if (nSmooth > 2) nSmooth = 2;
+	if (nSmooth > 3) nSmooth = 3;
 	s_nSmooth = nSmooth;
 }
 
@@ -1304,8 +1304,8 @@ void LithBitmapFont::FreeHD()
 }
 
 //*********************************************************************************
-// The smoothed image (TextSmooth 2, or 1 for a font without an HD image:
-// the air font). Each glyph is enlarged on its own (what lies outside
+// The smoothed image (TextSmooth 2 soft, 3 sharp, or 1 for a font without
+// an HD image, the air font, sharp). Each glyph is enlarged on its own (what lies outside
 // its cell counts as background) with a Catmull-Rom cubic. In the sharp mode
 // each result is then pushed towards the darkest or brightest of the 4x4
 // retail pixels it was made from, along an S-curve: flat areas, colours and
@@ -1479,6 +1479,8 @@ void LithBitmapFont::BuildHD()
 		return;
 	m_nHDScale = s;
 	m_nHDSmooth = s_nSmooth;
+	// HD_Sample's mode: 1 sharp edges, 2 soft
+	int nMode = (s_nSmooth == 2) ? 2 : 1;
 
 	HLTCOLOR hBack = m_bChromaKey ? m_hTransColor : SETRGB(0, 0, 0);
 	m_pClient->FillRect(m_pFontHD, LTNULL, hBack);
@@ -1530,7 +1532,7 @@ void LithBitmapFont::BuildHD()
 				HLTCOLOR c;
 				if (m_bChromaKey)
 				{
-					if (HD_Sample(pM, nW, nH, x, y, s, 1) < 0.5f)
+					if (HD_Sample(pM, nW, nH, x, y, s, nMode) < 0.5f)
 						continue;
 					// the colour of the retail pixel it lies in, or of a
 					// neighbour of it that is part of the glyph
@@ -1557,9 +1559,9 @@ void LithBitmapFont::BuildHD()
 				}
 				else
 				{
-					uint8 r = HD_Byte(HD_Sample(pR, nW, nH, x, y, s, 1));
-					uint8 g = HD_Byte(HD_Sample(pG, nW, nH, x, y, s, 1));
-					uint8 b = HD_Byte(HD_Sample(pB, nW, nH, x, y, s, 1));
+					uint8 r = HD_Byte(HD_Sample(pR, nW, nH, x, y, s, nMode));
+					uint8 g = HD_Byte(HD_Sample(pG, nW, nH, x, y, s, nMode));
+					uint8 b = HD_Byte(HD_Sample(pB, nW, nH, x, y, s, nMode));
 					if (!r && !g && !b)
 						continue;
 					c = SETRGB(r, g, b);

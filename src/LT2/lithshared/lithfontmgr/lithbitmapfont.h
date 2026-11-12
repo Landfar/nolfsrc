@@ -131,8 +131,9 @@ class LithBitmapFont : public LithFont
 		// image s times larger rather than stretching the retail glyphs'
 		// pixels (TextSmooth): 1, the default, its HD image, drawn from a
 		// free outline font (LoadHDFile), or where it has none the retail
-		// glyphs enlarged with smooth edges (BuildHD); 2 always the latter;
-		// 0 neither (stage 1's enlarged pixels).
+		// glyphs enlarged with smooth edges (BuildHD); 2 always the latter,
+		// soft; 3 always the latter, sharp; 0 neither (stage 1's enlarged
+		// pixels).
 		static void	SetGlobalSmooth(int nSmooth);
 
 	private:
