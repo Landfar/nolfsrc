@@ -461,6 +461,15 @@ LTBOOL CInterfaceResMgr::InitFonts()
             m_pChooserFont=LTNULL;
             return LTFALSE;
 		}
+#ifdef NOLFSRC_MODERN
+		// HD fonts: the menus' fonts measure in layout units, the HUD's
+		// (messages, subtitles, mission text, HUD) in screen pixels
+		m_pSmallFont->SetLayoutMetrics(LTTRUE);
+		m_pMediumFont->SetLayoutMetrics(LTTRUE);
+		m_pLargeFont->SetLayoutMetrics(LTTRUE);
+		m_pHelpFont->SetLayoutMetrics(LTTRUE);
+		m_pTitleFont->SetLayoutMetrics(LTTRUE);
+#endif
 	}
 	else
 	{

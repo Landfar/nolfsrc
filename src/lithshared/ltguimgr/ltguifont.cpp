@@ -262,10 +262,23 @@ LTIntPt CLTGUIFont::GetPositionFromIndex(HSTRING hString, int nIndex, int nWidth
 // Returns the height of the font
 int CLTGUIFont::GetHeight()
 {
+#ifdef NOLFSRC_MODERN
+	// a menu font answers in layout units (HD fonts)
+	if (m_pLithFont && !m_pLithFont->IsSystemFont())
+		return ((LithBitmapFont*)m_pLithFont)->LayoutHeight();
+#endif
 	if (m_pLithFont)
 		return m_pLithFont->Height();
 	return 0;
 }
+#ifdef NOLFSRC_MODERN
+
+void CLTGUIFont::SetLayoutMetrics(LTBOOL bLayout)
+{
+	if (m_pLithFont && !m_pLithFont->IsSystemFont())
+		((LithBitmapFont*)m_pLithFont)->SetLayoutMetrics(bLayout);
+}
+#endif
 
 LTBOOL CLTGUIFont::IsChromaKeyed()
 {

@@ -55,6 +55,7 @@ LithBitmapFont::LithBitmapFont()
 #ifdef NOLFSRC_MODERN
 	m_nScale = 1;
 	m_nBaseAvgWidth = 0;
+	m_bLayoutMetrics = LTFALSE;
 	memset(m_aBaseWidths, 0, sizeof(m_aBaseWidths));
 #endif
 }
@@ -194,6 +195,15 @@ void LithBitmapFont::GetTextExtents(char *szString, LITHFONTDRAWDATA *lfDD, uint
 		if (x < m_lfFD->pWidths[i])
 			x = m_lfFD->pWidths[i];
 	}
+#ifdef NOLFSRC_MODERN
+
+	// a menu font answers in layout units, rounded up
+	if (m_bLayoutMetrics && m_nScale > 1)
+	{
+		x = (x + m_nScale - 1) / m_nScale;
+		y = (y + m_nScale - 1) / m_nScale;
+	}
+#endif
 
 	m_lfSD->byLastState = LTF_STATE_EXTENTS;
 
@@ -218,7 +228,11 @@ void LithBitmapFont::GetPositionFromIndex(char *szString, LITHFONTDRAWDATA *lfDD
 	if (y > 0)
 	{
 		y -= lfDD->nLineSpace;
+#ifdef NOLFSRC_MODERN
+		y -= LayoutHeight();
+#else
 		y -= m_nHeight;
+#endif
 	}
 }
 
@@ -291,10 +305,18 @@ void LithBitmapFont::SetDrawData(HSURFACE pDest, char *szString, LITHFONTDRAWDAT
 		m_nExtraLetterSpace = m_lfDD->nLetterSpace;
 #endif
 
+#ifdef NOLFSRC_MODERN
+		// a menu font's wrap width is in layout units
+		if (m_dwFlags & LTF_DRAW_FORMATTED)
+			SetFormatData(m_lfDD->dwFormatWidth * (m_bLayoutMetrics ? m_nScale : 1));
+		else
+			SetFormatData(0);
+#else
 		if (m_dwFlags & LTF_DRAW_FORMATTED)
 			SetFormatData(m_lfDD->dwFormatWidth);
 		else
 			SetFormatData(0);
+#endif
 	}
 
 	if (m_pFont)

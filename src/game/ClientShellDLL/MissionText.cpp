@@ -7,6 +7,10 @@
 #include "InterfaceResMgr.h"
 #include "LayoutMgr.h"
 #include "SoundMgr.h"
+#ifdef NOLFSRC_MODERN
+// HD fonts: the mission text's width follows the glyph scale
+#include "cshell/p3_ui.h"
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -42,7 +46,12 @@ void	CMissionText::Init()
 {
 	m_lfDrawData.dwFlags = LTF_DRAW_TIMED | LTF_DRAW_FORMATTED | LTF_TIMED_ALL | LTF_EXTRA_LOCKLAST;
 	m_lfDrawData.byJustify = LTF_JUSTIFY_LEFT;
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the layout's width in the (screen-pixel) message font's pixels
+    m_lfDrawData.dwFormatWidth      = (uint32)g_pLayoutMgr->GetMissionTextWidth() * P3_TextScale();
+#else
     m_lfDrawData.dwFormatWidth      = (uint32)g_pLayoutMgr->GetMissionTextWidth();
+#endif
 	m_lfDrawData.fLetterDelay		= g_pLayoutMgr->GetMissionTextLetterDelay();
 	m_lfDrawData.fLineDelay			= g_pLayoutMgr->GetMissionTextLineDelay();
 	m_lfDrawData.fLineScrollTime	= g_pLayoutMgr->GetMissionTextLineScrollTime();

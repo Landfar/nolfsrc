@@ -61,6 +61,11 @@ public:
 
 	// Returns the height of the font
 	int		GetHeight();
+#ifdef NOLFSRC_MODERN
+
+	// HD fonts: a menu font measures in the menus' layout units (lithbitmapfont.h)
+	void	SetLayoutMetrics(LTBOOL bLayout);
+#endif
 
 	LTBOOL	IsChromaKeyed();
 	LTBOOL	IsSystemFont();

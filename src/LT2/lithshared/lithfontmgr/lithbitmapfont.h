@@ -119,6 +119,14 @@ class LithBitmapFont : public LithFont
 		static void	SetGlobalScale(int nScale);
 		static int	GetGlobalScale()	{ return s_nScale; }
 
+		// A menu font measures in the menus' 640x480 layout units (the glyph
+		// pixels at scale 1): extents, height and wrap widths are divided by
+		// (or, for a wrap width it is given, multiplied by) the scale, while
+		// it still draws at the full scale.
+		void	SetLayoutMetrics(LTBOOL bLayout)	{ m_bLayoutMetrics = bLayout; }
+		int		LayoutScale()		{ ApplyScale(); return m_bLayoutMetrics ? m_nScale : 1; }
+		int		LayoutHeight()		{ return m_nHeight / LayoutScale(); }
+
 	private:
 		void	ApplyScale();
 		void	BlitGlyph(int nX, int nY, LTBOOL bSolid);
@@ -127,6 +135,7 @@ class LithBitmapFont : public LithFont
 		int			m_nScale;						// the scale the metrics below are at
 		uint32		m_aBaseWidths[LTF_NUM_TOTAL_CHARS];	// m_lfOD.pWidths at scale 1
 		uint32		m_nBaseAvgWidth;				// m_nAvgWidth at scale 1
+		LTBOOL		m_bLayoutMetrics;				// measures in layout units (menus)
 #endif
 };
 
