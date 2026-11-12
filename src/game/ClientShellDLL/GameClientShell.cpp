@@ -4119,6 +4119,39 @@ void CGameClientShell::HandleZoomChange(uint8 nWeaponId, LTBOOL bReset)
 	}
 }
 
+#ifdef NOLFSRC_MODERN
+// ----------------------------------------------------------------------- //
+//
+//	M-P5-21: move the scope to zoom step nView, 0 closing it. Unlike the
+//	retail ZoomIn/ZoomOut it does not wait for a zoom under way to end:
+//	UpdateCameraZoom heads for the new step's field of view from wherever
+//	the camera is, so every wheel notch counts.
+//
+// ----------------------------------------------------------------------- //
+
+void CGameClientShell::P5_SetZoomView(int nView)
+{
+	CPlayerStats* pStats = m_InterfaceMgr.GetPlayerStats();
+	if (!pStats || nView == m_nZoomView) return;
+
+	// Opening from a closed scope (not one still on its way out)
+	LTBOOL bOpen = (m_nZoomView == 0 && !m_bZooming);
+
+	m_bZoomingIn = (nView > m_nZoomView) ? LTTRUE : LTFALSE;
+	m_nZoomView  = nView;
+	m_bZooming   = LTTRUE;
+
+	if (bOpen)
+	{
+		BeginZoom();
+	}
+
+	m_InterfaceMgr.EndZoom();
+	m_InterfaceMgr.BeginZoom(m_bZoomingIn);
+	HandleZoomChange(pStats->GetCurWeapon());
+}
+#endif
+
 
 void CGameClientShell::ProcessHandshake(HMESSAGEREAD hMessage)
 {
@@ -4253,6 +4286,23 @@ void CGameClientShell::OnCommandOn(int command)
 #ifdef NOLFSRC_MODERN
 	// M-P2-01: no game command while the developer console is open
 	if (P2_OnCommandOn(command)) return;
+
+	// M-P5-21: scoped, the weapon wheel (next/previous weapon) steps the
+	// zoom instead of opening the weapon chooser
+	if ((command == COMMAND_ID_NEXT_WEAPON || command == COMMAND_ID_PREV_WEAPON) &&
+		m_nZoomView > 0 && P5_ScopeMouseOn() && IsPlayerInWorld() &&
+		!IsPlayerDead() && m_InterfaceMgr.GetGameState() == GS_PLAYING)
+	{
+		int nZoomLevel = P5_ScopeZoomLevel();
+		if (!m_weaponModel.IsDisabled() && nZoomLevel > 0)
+		{
+			int nView = m_nZoomView + (command == COMMAND_ID_PREV_WEAPON ? 1 : -1);
+			if (nView < 1) nView = 1;
+			if (nView > nZoomLevel) nView = nZoomLevel;
+			P5_SetZoomView(nView);
+		}
+		return;
+	}
 #endif
 	// Let the interface handle the command first...
 
@@ -4374,6 +4424,15 @@ void CGameClientShell::OnCommandOn(int command)
 		// M-P5-13: toggle zoom -- a zoom-in step, or out after the last one
 		case COMMAND_ID_TOGGLE_ZOOM :
 		{
+			// M-P5-21: with ScopeMouse, it opens and closes the scope
+			if (P5_ScopeMouseOn())
+			{
+				if (!m_weaponModel.IsDisabled() && P5_ScopeZoomLevel() > 0)
+				{
+					P5_SetZoomView(m_nZoomView > 0 ? 0 : 1);
+				}
+				break;
+			}
 			OnCommandOn(P5_ToggleZoomCommand(m_nZoomView));
 		}
 		break;

@@ -57,6 +57,7 @@ the modern build.
 | `NoRawInput` | 0 | 1 keeps the new mouse look but reads the cursor's movement instead of raw input. It is also used automatically when raw input is unavailable. |
 | `CrouchToggle` | 0 | 1: one press of Duck crouches, the next stands up (Duck still works as a hold while swimming, on a ladder or on a vehicle). Game options: "Toggle crouch". |
 | `QuickSwitch` | 0 | 1: next/previous weapon switch at once, without confirming. Game options: "Quick weapon switch". |
+| `ScopeMouse` | 1 | 1: the middle mouse button (ToggleZoom) opens and closes a scope, and while looking through it the wheel zooms in (up) and out (down) instead of switching weapons. 0: each middle-button press zooms a step further, closing after the last, and the wheel always switches weapons. |
 | `PadLookSpeed` | 1 | Controller: right-stick turn rate (times 180 degrees a second across, 120 up and down). Controller options. |
 | `PadInvertY` | 0 | Controller: 1 inverts the right stick's up and down. Controller options. |
 | `PadLookDeadZone` | 0.15 | Controller: the right stick's dead zone (0-0.9 of its travel). Controller options. |

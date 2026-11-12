@@ -33,6 +33,10 @@ static VarTrack s_vtQuickSwitch;
 // CrouchToggle (M-P5-19): the Duck control toggles crouching.
 static VarTrack s_vtCrouchToggle;
 
+// ScopeMouse (M-P5-21): the middle button opens and closes the scope, the
+// wheel zooms.
+static VarTrack s_vtScopeMouse;
+
 // How long the weapon chooser stays up after a quick switch.
 static const float kfQuickSwitchChooserTime = 2.5f;
 
@@ -48,6 +52,11 @@ void P5_OnEngineInitialized()
 	if (!s_vtCrouchToggle.IsInitted())
 	{
 		s_vtCrouchToggle.Init(g_pLTClient, "CrouchToggle", NULL, 0.0f);
+	}
+
+	if (!s_vtScopeMouse.IsInitted())
+	{
+		s_vtScopeMouse.Init(g_pLTClient, "ScopeMouse", NULL, 1.0f);
 	}
 
 	// M-P5-13: the engine only binds actions it knows. It writes the ones it
@@ -229,6 +238,31 @@ int P5_ToggleZoomCommand(int nZoomView)
 	}
 
 	return COMMAND_ID_ZOOM_IN;
+}
+
+// ----------------------------------------------------------------------- //
+//
+//	M-P5-21: the scope on the mouse
+//
+// ----------------------------------------------------------------------- //
+
+LTBOOL P5_ScopeMouseOn()
+{
+	return (!s_vtScopeMouse.IsInitted() || s_vtScopeMouse.GetFloat() != 0.0f) ? LTTRUE : LTFALSE;
+}
+
+int P5_ScopeZoomLevel()
+{
+	if (!g_pGameClientShell || !g_pWeaponMgr) return 0;
+
+	CPlayerStats* pStats = g_pGameClientShell->GetPlayerStats();
+	if (!pStats) return 0;
+
+	uint8 nScopeId = pStats->GetScope();
+	if (nScopeId == WMGR_INVALID_ID) return 0;
+
+	MOD* pMod = g_pWeaponMgr->GetMod(nScopeId);
+	return pMod ? pMod->nZoomLevel : 0;
 }
 
 // ----------------------------------------------------------------------- //

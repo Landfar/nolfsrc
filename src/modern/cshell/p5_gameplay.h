@@ -37,6 +37,13 @@ float		P5_ChooserDelay(float fDelay);			// how long the weapon chooser stays ope
 // out from the last step), given the current zoom step.
 int			P5_ToggleZoomCommand(int nZoomView);
 
+// M-P5-21: scope on the mouse. ScopeMouse (default 1): ToggleZoom (the
+// middle button) opens and closes the scope, and while scoped the weapon
+// wheel steps the zoom. P5_ScopeZoomLevel: the current scope's zoom steps,
+// 0 with no scope.
+LTBOOL		P5_ScopeMouseOn();
+int			P5_ScopeZoomLevel();
+
 // M-P5-14: model shadows, at the end of a cinematic (in place of the
 // retail restore) and when a world has started.
 void		P5_OnCinematicCameraOff();

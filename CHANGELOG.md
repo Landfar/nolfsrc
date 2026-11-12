@@ -12,6 +12,10 @@ covers each change in detail, under its item number (M-P1-01 and so on).
 
 Since the first public release:
 
+- **The scope on the mouse.** The middle mouse button now opens and closes
+  a scope, and while looking through it the wheel zooms in and out instead
+  of switching weapons (the controller's left trigger and bumpers alike).
+  `ScopeMouse 0` in the console brings back the stepping middle button.
 - **Other players move smoothly online.** Positions went to the server 7
   times a second and back 6 times a second (2001's modem settings), so other
   players skipped about; both are 30 now, and an existing config is raised

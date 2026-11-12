@@ -7,7 +7,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_P5_QUICKSWITCH              "Quick weapon switch"
     IDS_P5_HELP_QUICKSWITCH         "Next and previous weapon change weapons straight away, without waiting for you to confirm."
-    IDS_P5_CONTROL_TOGGLE_ZOOM      "Step zoom"
+    IDS_P5_CONTROL_TOGGLE_ZOOM      "Scope on/off"
     IDS_P5_ACTIONSTRING_TOGGLE_ZOOM "ToggleZoom"
     IDS_P5_CROUCHTOGGLE             "Toggle crouch"
     IDS_P5_HELP_CROUCHTOGGLE        "Press Duck once to crouch and again to stand, instead of holding it down."

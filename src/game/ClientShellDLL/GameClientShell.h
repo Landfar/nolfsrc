@@ -592,6 +592,10 @@ class CGameClientShell : public IClientShell
 		void	BeginZoom();
         void    HandleZoomChange(uint8 nWeaponId, LTBOOL bReset=LTFALSE);
 		void	EndZoom();
+#ifdef NOLFSRC_MODERN
+		// M-P5-21: move the scope to zoom step nView (0 closes it)
+		void	P5_SetZoomView(int nView);
+#endif
 
 		void	Update3rdPersonInfo();
         void    SetCameraFOV(LTFLOAT fFovX, LTFLOAT fFovY);
