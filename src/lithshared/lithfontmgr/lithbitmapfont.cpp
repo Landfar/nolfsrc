@@ -10,6 +10,8 @@
 #include "lithbitmapfont.h"
 #ifdef NOLFSRC_MODERN
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 #endif
 
 // NOTE: 18/25 functions are byte-identical to the shipped object. The other
@@ -1302,7 +1304,8 @@ void LithBitmapFont::FreeHD()
 }
 
 //*********************************************************************************
-// The smoothed image. Each glyph is enlarged on its own (what lies outside
+// The smoothed image (TextSmooth 2, or 1 for a font without an HD image:
+// the air font). Each glyph is enlarged on its own (what lies outside
 // its cell counts as background) with a Catmull-Rom cubic. In the sharp mode
 // each result is then pushed towards the darkest or brightest of the 4x4
 // retail pixels it was made from, along an S-curve: flat areas, colours and
@@ -1381,12 +1384,67 @@ namespace
 	}
 }
 
+// The font's HD image for scale s, drawn for this project from a free outline
+// font (tools/hdfonts.py): <its directory>\HD\<its name>_<s>.pcx, the retail
+// image's layout s times larger, white on black. Not for a colour-keyed font.
+LTBOOL LithBitmapFont::LoadHDFile(int s)
+{
+	if (m_bChromaKey)
+		return LTFALSE;
+
+	const char *pName = m_lfOD.szRefName;
+	const char *pBase = pName;
+	const char *p;
+	for (p = pName; *p; p++)
+	{
+		if (*p == '\\' || *p == '/')
+			pBase = p + 1;
+	}
+	int nDir = (int)(pBase - pName);
+	const char *pDot = strrchr(pBase, '.');
+	int nBase = pDot ? (int)(pDot - pBase) : (int)strlen(pBase);
+
+	char szPath[LTF_OFFSETS_NAME_SIZE + 32];
+	if (nDir + nBase + 16 >= (int)sizeof(szPath))
+		return LTFALSE;
+	sprintf(szPath, "%.*sHD\\%.*s_%d.pcx", nDir, pName, nBase, pBase, s);
+
+	HSURFACE hSurf = m_pClient->CreateSurfaceFromBitmap(szPath);
+	if (!hSurf)
+		return LTFALSE;
+
+	uint32 nW = 0, nH = 0;
+	m_pClient->GetSurfaceDims(hSurf, &nW, &nH);
+	if (nW != m_nSurfWidth * s || nH != m_nSurfHeight * s)
+	{
+		m_pClient->DeleteSurface(hSurf);
+		return LTFALSE;
+	}
+
+	m_pFontHD = hSurf;
+	for (int i = 0; i < LTF_NUM_TOTAL_CHARS; i++)
+	{
+		m_aHDX[i] = m_lfOD.pOffsets[i] * s;
+		m_aHDY[i] = 0;
+	}
+	return LTTRUE;
+}
+
 void LithBitmapFont::BuildHD()
 {
 	if (!m_pClient || !m_pFont || m_nScale < 2 || !m_nSurfWidth || !m_nSurfHeight)
 		return;
 
 	int s = m_nScale;
+
+	// TextSmooth 1: the HD image drawn for the font, where there is one
+	if (s_nSmooth == 1 && LoadHDFile(s))
+	{
+		m_nHDScale = s;
+		m_nHDSmooth = s_nSmooth;
+		return;
+	}
+
 	int nH = (int)m_nSurfHeight;
 	int nCellH = nH * s;
 	int nChar;
@@ -1499,9 +1557,9 @@ void LithBitmapFont::BuildHD()
 				}
 				else
 				{
-					uint8 r = HD_Byte(HD_Sample(pR, nW, nH, x, y, s, s_nSmooth));
-					uint8 g = HD_Byte(HD_Sample(pG, nW, nH, x, y, s, s_nSmooth));
-					uint8 b = HD_Byte(HD_Sample(pB, nW, nH, x, y, s, s_nSmooth));
+					uint8 r = HD_Byte(HD_Sample(pR, nW, nH, x, y, s, 1));
+					uint8 g = HD_Byte(HD_Sample(pG, nW, nH, x, y, s, 1));
+					uint8 b = HD_Byte(HD_Sample(pB, nW, nH, x, y, s, 1));
 					if (!r && !g && !b)
 						continue;
 					c = SETRGB(r, g, b);

@@ -33,6 +33,7 @@
 #include "VarTrack.h"
 #include "cshell/p2_console.h"
 #include "cshell/p2_log.h"
+#include "cshell/p3_ui.h"
 
 extern CGameClientShell* g_pGameClientShell;
 extern CCheatMgr*        g_pCheatMgr;
@@ -724,7 +725,9 @@ void P2Console_Draw()
 	g_pLTClient->GetSurfaceDims(hScreen, &nWidth, &nHeight);
 
 	nConHeight = nHeight / 2;
-	nLineHeight = pFont->GetHeight() + 2;
+	// the small font measures in layout units but draws at the glyph scale
+	// (HD fonts): a line is as tall as the text drawn
+	nLineHeight = P3_TextLen(pFont->GetHeight()) + 2;
 	if (nLineHeight < 4) nLineHeight = 4;
 
 	g_pLTClient->Start3D();
