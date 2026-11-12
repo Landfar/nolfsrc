@@ -66,8 +66,8 @@ LTIntPt CLTTextWnd::SetText(const char *szText, int nWidth)
 		pt = m_pFont->GetTextExtents(hStr);
 	}
 
-    g_pLTClient->FreeString(hStr);
 #ifdef NOLFSRC_MODERN
+    g_pLTClient->FreeString(hStr);
 	// HD fonts: the (medium) font measures and wraps in layout units, but
 	// the window is in pixels, at the glyph scale
 	m_lfdd.dwFormatWidth = pt.x;
@@ -78,6 +78,7 @@ LTIntPt CLTTextWnd::SetText(const char *szText, int nWidth)
 #else
 	m_nWidth = pt.x;
 	m_nHeight = pt.y;
+    g_pLTClient->FreeString(hStr);
 	m_lfdd.dwFormatWidth = m_nWidth;
 #endif
 	m_lfdd.dwFlags |= LTF_DRAW_FORMATTED;
