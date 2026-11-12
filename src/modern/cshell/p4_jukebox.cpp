@@ -239,11 +239,13 @@ LTBOOL CP4FolderJukebox::Build()
 	}
 
 	pos.y += pHeaderFont->GetHeight() + 4;
-	int nListHeight = (rcPieces.bottom - pos.y);
+	// The list lays its items out on the screen (M-P3-03): its height and
+	// the spacing scale with the menu page and the glyphs.
+	int nListHeight = P3_MenuLen(rcPieces.bottom - pos.y);
 	m_pPieceList = debug_new(CListCtrl);
 	m_pPieceList->Create(nListHeight, LTTRUE, m_nPieceWidth);
 	m_pPieceList->SetParam1(m_nPieceWidth);
-	m_pPieceList->SetItemSpacing(2);
+	m_pPieceList->SetItemSpacing(P3_TextLen(2));
 	m_pPieceList->EnableMouseMoveSelect(LTTRUE);
 	m_pPieceList->SetHelpID(IDS_P4_HELP_JUKEBOX_PIECE);
 	AddFixedControl(m_pPieceList, pos, LTTRUE);

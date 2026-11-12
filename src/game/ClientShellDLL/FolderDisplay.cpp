@@ -117,8 +117,9 @@ LTBOOL CFolderDisplay::Build()
 
 	// Add the "renderer" option
 #ifdef NOLFSRC_MODERN
-	// HD fonts: the label columns at the glyph scale
-    m_pRendererCtrl = AddCycleItem(IDS_DISPLAY_RENDERER,IDS_HELP_RENDERER,P3_TextLen(100),25,LTNULL);
+	// HD fonts: the label column at the glyph scale, one width for every row
+	// (the values line up at the toggles' column: header + spacer = 175)
+    m_pRendererCtrl = AddCycleItem(IDS_DISPLAY_RENDERER,IDS_HELP_RENDERER,P3_TextLen(175)-25,25,LTNULL);
 #else
     m_pRendererCtrl = AddCycleItem(IDS_DISPLAY_RENDERER,IDS_HELP_RENDERER,100,25,LTNULL);
 #endif
@@ -140,7 +141,7 @@ LTBOOL CFolderDisplay::Build()
 
 	// Add the "resolution" control
 #ifdef NOLFSRC_MODERN
-    m_pResolutionCtrl = AddCycleItem(IDS_DISPLAY_RESOLUTION,IDS_HELP_RESOLUTION,P3_TextLen(150),25,LTNULL, LTFALSE);
+    m_pResolutionCtrl = AddCycleItem(IDS_DISPLAY_RESOLUTION,IDS_HELP_RESOLUTION,P3_TextLen(175)-25,25,LTNULL, LTFALSE);
 #else
     m_pResolutionCtrl = AddCycleItem(IDS_DISPLAY_RESOLUTION,IDS_HELP_RESOLUTION,150,25,LTNULL, LTFALSE);
 #endif
@@ -152,7 +153,7 @@ LTBOOL CFolderDisplay::Build()
 	// M-P1-06, M-P1-22: the window mode: full screen, a window, or a
 	// borderless window (at the desktop's resolution, so the resolution
 	// list is greyed out for it)
-	m_pP1WindowModeCtrl = AddCycleItem(IDS_P1_WINDOWMODE,IDS_P1_HELP_WINDOWMODE,P3_TextLen(175),25,&m_nP1WindowMode);
+	m_pP1WindowModeCtrl = AddCycleItem(IDS_P1_WINDOWMODE,IDS_P1_HELP_WINDOWMODE,P3_TextLen(175)-25,25,&m_nP1WindowMode);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_FULLSCREEN);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_WINDOWED);
 	m_pP1WindowModeCtrl->AddString(IDS_P1_WINDOW_BORDERLESS);

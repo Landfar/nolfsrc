@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "SliderCtrl.h"
 #include "InterfaceResMgr.h"
+#ifdef NOLFSRC_MODERN
+// HD fonts: the bar as tall as the text at the glyph scale
+#include "cshell/p3_ui.h"
+#endif
 
 
 char CSliderCtrl::m_sLeftArrow[64] = "interface\\slider_left.pcx";
@@ -76,6 +80,29 @@ LTBOOL CSliderCtrl::Create ( HSTRING hText, CLTGUIFont *pFont, int nSliderOffset
 	if (surfHeight > m_dwHeight)
 		m_dwHeight = surfHeight;
 
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the row keeps its height in layout units; on the screen the
+	// text is the glyph scale taller, so the arrows centre and the bar (with
+	// its number) spans that height
+	int nDrawHeight = P3_TextLen(m_pFont->GetHeight()) + 4;
+	if ((int)surfHeight > nDrawHeight)
+		nDrawHeight = (int)surfHeight;
+
+	m_rcLeft.left = nSliderOffset;
+	m_rcLeft.right = nSliderOffset + surfWidth;
+	m_rcLeft.top = (nDrawHeight-(int)surfHeight)/2;
+	m_rcLeft.bottom = m_rcLeft.top + surfHeight;
+
+	m_rcRight.right = nSliderOffset + nSliderWidth;
+	m_rcRight.left = m_rcRight.right - surfWidth;
+	m_rcRight.top = (nDrawHeight-(int)surfHeight)/2;
+	m_rcRight.bottom = m_rcRight.top + surfHeight;
+
+	m_rcBar.left = m_rcLeft.right + 8;
+	m_rcBar.right = m_rcRight.left - 8;
+	m_rcBar.top = 2;
+	m_rcBar.bottom = nDrawHeight - 2;
+#else
 	//set left arrow rect
 	m_rcLeft.left = nSliderOffset;
 	m_rcLeft.right = nSliderOffset + surfWidth;
@@ -99,6 +126,7 @@ LTBOOL CSliderCtrl::Create ( HSTRING hText, CLTGUIFont *pFont, int nSliderOffset
 	m_rcBar.right = m_rcRight.left - 8;
 	m_rcBar.top = 2;
 	m_rcBar.bottom = m_dwHeight - 2;
+#endif
 
 	//calculate width of bar
 	m_nBarWidth = m_rcBar.right - m_rcBar.left;

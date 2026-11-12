@@ -236,15 +236,28 @@ void CFolderSave::BuildSavedLevelList()
 				pCtrl->SetParam1( m_controlArray.GetSize() - 1);
 				// The world name column
 
+#ifdef NOLFSRC_MODERN
+				// HD fonts: the columns at the glyph scale
+				pCtrl->AddColumn(hWorld, P3_TextLen(kColumnWidth), LTF_JUSTIFY_LEFT);
+#else
 				pCtrl->AddColumn(hWorld, kColumnWidth, LTF_JUSTIFY_LEFT);
+#endif
 
 				// This is a spacer
+#ifdef NOLFSRC_MODERN
+				pCtrl->AddColumn(hEmpty, P3_TextLen(kGap), LTF_JUSTIFY_LEFT);
+#else
 				pCtrl->AddColumn(hEmpty, kGap, LTF_JUSTIFY_LEFT);
+#endif
 
 				if (hTime)
 				{
 					// The column that contains the date/time
+#ifdef NOLFSRC_MODERN
+					pCtrl->AddColumn(hTime, P3_TextLen(230), LTF_JUSTIFY_LEFT);
+#else
 					pCtrl->AddColumn(hTime, 230, LTF_JUSTIFY_LEFT);
+#endif
 					g_pLTClient->FreeString(hTime);
 				}
 				g_pLTClient->FreeString(hWorld);
@@ -265,13 +278,25 @@ void CFolderSave::BuildSavedLevelList()
 		pCtrl->SetParam1( m_controlArray.GetSize() - 1);
 		// The world name column
 
+#ifdef NOLFSRC_MODERN
+		pCtrl->AddColumn(IDS_EMPTY, P3_TextLen(kColumnWidth), LTF_JUSTIFY_LEFT);
+#else
 		pCtrl->AddColumn(IDS_EMPTY, kColumnWidth, LTF_JUSTIFY_LEFT);
+#endif
 
 		// This is a spacer
+#ifdef NOLFSRC_MODERN
+		pCtrl->AddColumn(hEmpty, P3_TextLen(kGap), LTF_JUSTIFY_LEFT);
+#else
 		pCtrl->AddColumn(hEmpty, kGap, LTF_JUSTIFY_LEFT);
+#endif
 
 		// The column that contains the date/time
+#ifdef NOLFSRC_MODERN
+		pCtrl->AddColumn(hEmpty, P3_TextLen(230), LTF_JUSTIFY_LEFT);
+#else
 		pCtrl->AddColumn(hEmpty, 230, LTF_JUSTIFY_LEFT);
+#endif
 	}
 
     g_pLTClient->FreeString(hEmpty);

@@ -119,9 +119,17 @@ void CFolderNew::BuildMissionList()
 
         LTIntPt offset;
 
+#ifdef NOLFSRC_MODERN
+		// HD fonts: the check box at the glyph scale, as the text beside it
+		pCheck->P3_SetTextScaled(LTTRUE);
+        pGroup->AddControl(pCheck,offset,LTFALSE);
+		offset.x = P3_TextLen(nWidth);
+        pGroup->AddControl(pCtrl,offset,LTTRUE);
+#else
         pGroup->AddControl(pCheck,offset,LTFALSE);
 		offset.x = nWidth;
         pGroup->AddControl(pCtrl,offset,LTTRUE);
+#endif
 
 //		AddPhotoBitmap(g_pInterfaceResMgr->GetSharedSurface(pMission->szPhoto));
 

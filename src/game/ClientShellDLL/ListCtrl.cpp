@@ -142,8 +142,15 @@ void CListCtrl::Render ( HSURFACE hDestSurf )
 	unsigned int i;
 	for ( i = m_nFirstDisplayedItem; i < m_controlArray.GetSize(); i++ )
 	{
+#ifdef NOLFSRC_MODERN
+		// HD fonts: an item's size is its text's, in layout units, and its
+		// text is drawn at the glyph scale
+		size.x = P3_TextLen(m_controlArray[i]->GetWidth());
+		size.y = P3_TextLen(m_controlArray[i]->GetHeight());
+#else
 		size.x = m_controlArray[i]->GetWidth();
 		size.y = m_controlArray[i]->GetHeight();
+#endif
 
 		if ( y+size.y < m_pos.y+m_nHeight )
 		{
@@ -643,8 +650,14 @@ int	CListCtrl::CalculateLastDisplayedIndex ( int nStartIndex )
 	unsigned int i;
 	for ( i = nStartIndex; i < m_controlArray.GetSize(); i++ )
 	{
+#ifdef NOLFSRC_MODERN
+		// HD fonts: as Render lays the items out
+		size.x=P3_TextLen(m_controlArray[i]->GetWidth());
+		size.y=P3_TextLen(m_controlArray[i]->GetHeight());
+#else
 		size.x=m_controlArray[i]->GetWidth();
 		size.y=m_controlArray[i]->GetHeight();
+#endif
 
 		if ( y+size.y < m_pos.y+m_nHeight )
 		{
@@ -711,8 +724,14 @@ CLTGUICtrl *CListCtrl::GetControlUnderPoint(int xPos, int yPos, int *pnIndex)
 		{
 			int nLeft=m_controlArray[i]->GetPos().x;
 			int nTop=m_controlArray[i]->GetPos().y;
+#ifdef NOLFSRC_MODERN
+			// HD fonts: the item covers its text at the glyph scale
+			int nRight=nLeft+P3_TextLen(m_controlArray[i]->GetWidth());
+			int nBottom=nTop+P3_TextLen(m_controlArray[i]->GetHeight());
+#else
 			int nRight=nLeft+m_controlArray[i]->GetWidth();
 			int nBottom=nTop+m_controlArray[i]->GetHeight();
+#endif
 
 			// Check to see if the click is in the bounding box for the control
 			if (xPos >= nLeft && xPos <= nRight && yPos >= nTop && yPos <= nBottom)

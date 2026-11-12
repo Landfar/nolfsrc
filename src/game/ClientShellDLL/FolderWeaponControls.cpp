@@ -166,7 +166,12 @@ void CFolderWeaponControls::OnFocus(LTBOOL bFocus)
 		CLTGUIColumnTextCtrl *pCtrl=AddColumnText(LTNULL, LTNULL, LTTRUE, GetMediumFont());
 
 		HSTRING hText = g_pLTClient->FormatString(IDS_KEY);
+#ifdef NOLFSRC_MODERN
+		// HD fonts: the key column at the glyph scale
+		pCtrl->AddColumn(hText, P3_TextLen(50), LTF_JUSTIFY_LEFT);
+#else
 		pCtrl->AddColumn(hText, 50, LTF_JUSTIFY_LEFT);
+#endif
 		g_pLTClient->FreeString(hText);
 
 		hText = g_pLTClient->FormatString(IDS_WEAPON);
@@ -185,7 +190,11 @@ void CFolderWeaponControls::OnFocus(LTBOOL bFocus)
 			char str[16];
 			sprintf(str,"  %s",szTriggers[i]);
 			hText = g_pLTClient->CreateString(str);
+#ifdef NOLFSRC_MODERN
+			pCtrl->AddColumn(hText, P3_TextLen(50), LTF_JUSTIFY_LEFT);
+#else
 			pCtrl->AddColumn(hText, 50, LTF_JUSTIFY_LEFT);
+#endif
 			g_pLTClient->FreeString(hText);
 
 			int nWeaponId = g_pWeaponMgr->GetWeaponId(m_nActions[i]);

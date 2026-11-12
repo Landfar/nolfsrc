@@ -66,6 +66,15 @@ protected:
 	// Receives a message when the "enter" key is pressed.
 	CLTGUICommandHandler	*m_pCommandHandler;
 
+#ifdef NOLFSRC_MODERN
+	// HD fonts: a bitmap that sits beside menu text (an objective's check
+	// box) is drawn at the glyph scale, as the text is
+public:
+	void			P3_SetTextScaled(LTBOOL bScaled) {m_bP3TextScaled = bScaled;}
+protected:
+	void			P3_RenderScaled(HSURFACE hDestSurf);
+	LTBOOL			m_bP3TextScaled;
+#endif
 };
 
 #endif // !defined(AFX_BITMAPCTRL_H__639D44A0_1A85_11D3_B2DB_006097097C7B__INCLUDED_)

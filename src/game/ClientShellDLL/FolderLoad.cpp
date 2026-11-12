@@ -131,13 +131,22 @@ void CFolderLoad::BuildSavedLevelList()
 			CLTGUIColumnTextCtrl* pColCtrl = AddColumnText(FOLDER_CMD_CUSTOM, IDS_HELP_QUICKLOAD, LTFALSE, GetSmallFont());
 
 			// The world name column
+#ifdef NOLFSRC_MODERN
+			// HD fonts: the columns at the glyph scale
+			pColCtrl->AddColumn(hLoad, P3_TextLen(kColumnWidth), LTF_JUSTIFY_LEFT);
+#else
 			pColCtrl->AddColumn(hLoad, kColumnWidth, LTF_JUSTIFY_LEFT);
+#endif
 
 			if (strlen(sQuickSave.szTime) > 0)
 			{
 				// The column that contains the date/time
 				HSTRING hTime=g_pLTClient->CreateString(sQuickSave.szTime);
+#ifdef NOLFSRC_MODERN
+				pColCtrl->AddColumn(hTime, P3_TextLen(230), LTF_JUSTIFY_LEFT);
+#else
 				pColCtrl->AddColumn(hTime, 230, LTF_JUSTIFY_LEFT);
+#endif
 				g_pLTClient->FreeString(hTime);
 			}
 			g_pLTClient->FreeString(hLoad);
@@ -161,13 +170,21 @@ void CFolderLoad::BuildSavedLevelList()
 			CLTGUIColumnTextCtrl* pColCtrl = AddColumnText(FOLDER_CMD_CUSTOM+1, IDS_HELP_RELOAD, LTFALSE, GetSmallFont());
 
 			// The world name column
+#ifdef NOLFSRC_MODERN
+			pColCtrl->AddColumn(hLoad, P3_TextLen(kColumnWidth), LTF_JUSTIFY_LEFT);
+#else
 			pColCtrl->AddColumn(hLoad, kColumnWidth, LTF_JUSTIFY_LEFT);
+#endif
 
 			if (strlen(sAutoSave.szTime) > 0)
 			{
 				// The column that contains the date/time
 				HSTRING hTime=g_pLTClient->CreateString(sAutoSave.szTime);
+#ifdef NOLFSRC_MODERN
+				pColCtrl->AddColumn(hTime, P3_TextLen(230), LTF_JUSTIFY_LEFT);
+#else
 				pColCtrl->AddColumn(hTime, 230, LTF_JUSTIFY_LEFT);
+#endif
 				g_pLTClient->FreeString(hTime);
 			}
 			g_pLTClient->FreeString(hLoad);
@@ -198,13 +215,21 @@ void CFolderLoad::BuildSavedLevelList()
 				CLTGUIColumnTextCtrl* pCtrl = AddColumnText(FOLDER_CMD_CUSTOM+2+i, IDS_HELP_LOADGAME, LTFALSE, GetSmallFont());
 
 				// The world name column
+#ifdef NOLFSRC_MODERN
+				pCtrl->AddColumn(hLoad, P3_TextLen(kColumnWidth), LTF_JUSTIFY_LEFT);
+#else
 				pCtrl->AddColumn(hLoad, kColumnWidth, LTF_JUSTIFY_LEFT);
+#endif
 
 				if (strlen(sSave.szTime) > 0)
 				{
 					// The column that contains the date/time
 					HSTRING hTime=g_pLTClient->CreateString(sSave.szTime);
+#ifdef NOLFSRC_MODERN
+					pCtrl->AddColumn(hTime, P3_TextLen(230), LTF_JUSTIFY_LEFT);
+#else
 					pCtrl->AddColumn(hTime, 230, LTF_JUSTIFY_LEFT);
+#endif
 					g_pLTClient->FreeString(hTime);
 				}
 				g_pLTClient->FreeString(hLoad);

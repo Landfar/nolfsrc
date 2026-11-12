@@ -135,10 +135,19 @@ void CFolderSummary::UpdateData()
 	CLTGUIColumnTextCtrl *pRanks=AddColumnText(LTNULL, LTNULL, LTTRUE, GetLargeFont());
 
 	// The rank header
+#ifdef NOLFSRC_MODERN
+	// HD fonts: the columns at the glyph scale
+	pRanks->AddColumn(IDS_STAT_RANK, P3_TextLen(200), LTF_JUSTIFY_LEFT);
+#else
 	pRanks->AddColumn(IDS_STAT_RANK, 200, LTF_JUSTIFY_LEFT);
+#endif
 	if (m_nFolderID != FOLDER_ID_FAILURE)
 	{
+#ifdef NOLFSRC_MODERN
+		pRanks->AddColumn(IDS_SUMMARY_BEST, P3_TextLen(200), LTF_JUSTIFY_LEFT);
+#else
 		pRanks->AddColumn(IDS_SUMMARY_BEST, 200, LTF_JUSTIFY_LEFT);
+#endif
 	}
     pRanks->Enable(LTFALSE);
 
@@ -149,13 +158,21 @@ void CFolderSummary::UpdateData()
 	int nRankId = 0;
 	if (m_nFolderID == FOLDER_ID_FAILURE)
 	{
+#ifdef NOLFSRC_MODERN
+		pRanks->AddColumn(IDS_STAT_FAILED, P3_TextLen(200), LTF_JUSTIFY_LEFT);
+#else
 		pRanks->AddColumn(IDS_STAT_FAILED, 200, LTF_JUSTIFY_LEFT);
+#endif
 	}
 	else
 	{
 		fRank = pMSummary->fCurRank;
 		nRankId = g_pMissionMgr->GetMissionRating()->GetRankId(fRank);
+#ifdef NOLFSRC_MODERN
+		pRanks->AddColumn(nRankId, P3_TextLen(200), LTF_JUSTIFY_LEFT);
+#else
 		pRanks->AddColumn(nRankId, 200, LTF_JUSTIFY_LEFT);
+#endif
 	}
 
 
@@ -164,7 +181,11 @@ void CFolderSummary::UpdateData()
 		//best rank
 		fRank = pMSummary->fBestRank;
 		nRankId = g_pMissionMgr->GetMissionRating()->GetRankId(fRank);
+#ifdef NOLFSRC_MODERN
+		pRanks->AddColumn(nRankId, P3_TextLen(200), LTF_JUSTIFY_LEFT);
+#else
 		pRanks->AddColumn(nRankId, 200, LTF_JUSTIFY_LEFT);
+#endif
 	}
     pRanks->Enable(LTFALSE);
 

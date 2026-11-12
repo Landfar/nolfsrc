@@ -237,12 +237,24 @@ void CFolderObjectives::BuildObjectivesList()
 
 			pGroup->Create(480,height);
 
+#ifdef NOLFSRC_MODERN
+			// HD fonts: the group places its parts on the screen, where the
+			// text and the check box are drawn at the glyph scale
+			pCheck->P3_SetTextScaled(LTTRUE);
+            LTIntPt offset(P3_TextLen(40), P3_TextLen((height - strHeight) / 2) );
+			pGroup->AddControl(pCtrl,offset);
+
+			offset.x = 0;
+			offset.y = P3_TextLen((height - bmpHeight) / 2);
+			pGroup->AddControl(pCheck,offset);
+#else
             LTIntPt offset(40, (height - strHeight) / 2 );
 			pGroup->AddControl(pCtrl,offset);
 
 			offset.x = 0;
 			offset.y = (height - bmpHeight) / 2;
 			pGroup->AddControl(pCheck,offset);
+#endif
             pGroup->Enable(LTFALSE);
 
 			AddFreeControl(pGroup);

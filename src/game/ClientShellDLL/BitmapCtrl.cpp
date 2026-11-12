@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "BitmapCtrl.h"
 #include "InterfaceResMgr.h"
+#ifdef NOLFSRC_MODERN
+// HD fonts: bitmaps beside menu text at the glyph scale
+#include "cshell/p3_ui.h"
+#endif
 
 namespace
 {
@@ -20,6 +24,9 @@ CBitmapCtrl::CBitmapCtrl()
     m_sSelectedSurface[0] = LTNULL;
     m_sDisabledSurface[0] = LTNULL;
     m_bFreeSurfaces = LTFALSE;
+#ifdef NOLFSRC_MODERN
+	m_bP3TextScaled = LTFALSE;
+#endif
 }
 
 CBitmapCtrl::~CBitmapCtrl()
@@ -119,6 +126,13 @@ void CBitmapCtrl::Destroy()
 // Render the control
 void CBitmapCtrl::Render ( HSURFACE hDestSurf )
 {
+#ifdef NOLFSRC_MODERN
+	if (m_bP3TextScaled)
+	{
+		P3_RenderScaled(hDestSurf);
+		return;
+	}
+#endif
 	int state = GetState();
 	if ((state == LGCS_DISABLED || !m_bEnabled) && m_sDisabledSurface[0])
 	{
@@ -232,3 +246,37 @@ void CBitmapCtrl::GetDisabledBitmap(char* pBuf, int nBufLen)
 	else
 		strncpy(pBuf,m_sNormalSurface,nBufLen);
 }
+#ifdef NOLFSRC_MODERN
+
+// HD fonts: Render, with the bitmap and its highlight at the glyph scale
+void CBitmapCtrl::P3_RenderScaled(HSURFACE hDestSurf)
+{
+	int nScale = P3_TextScale();
+	int state = GetState();
+	char *pName = m_sNormalSurface;
+	LTBOOL bHighlight = LTFALSE;
+	if ((state == LGCS_DISABLED || !m_bEnabled) && m_sDisabledSurface[0])
+		pName = m_sDisabledSurface;
+	else if (state == LGCS_SELECTED && m_sSelectedSurface[0])
+		pName = m_sSelectedSurface;
+	else if (state == LGCS_SELECTED)
+		bHighlight = LTTRUE;
+
+	P3_DrawScaled(hDestSurf, g_pInterfaceResMgr->GetSharedSurface(pName), m_pos.x, m_pos.y, (float)nScale, m_hTrans);
+
+	if (bHighlight)
+	{
+		int nW = m_nNormalWidth * nScale;
+		int nH = m_nNormalHeight * nScale;
+		int nE = kHighlightWidth * nScale;
+		LTRect rectL(m_pos.x,m_pos.y,m_pos.x+nE,m_pos.y+nH);
+		LTRect rectT(m_pos.x,m_pos.y,m_pos.x+nW,m_pos.y+nE);
+		LTRect rectR(m_pos.x+nW-nE,m_pos.y,m_pos.x+nW,m_pos.y+nH);
+		LTRect rectB(m_pos.x,m_pos.y+nH-nE,m_pos.x+nW,m_pos.y+nH);
+		g_pLTClient->FillRect(hDestSurf,&rectL,kWhite);
+		g_pLTClient->FillRect(hDestSurf,&rectT,kWhite);
+		g_pLTClient->FillRect(hDestSurf,&rectR,kWhite);
+		g_pLTClient->FillRect(hDestSurf,&rectB,kWhite);
+	}
+}
+#endif
