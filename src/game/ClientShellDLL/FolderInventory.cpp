@@ -636,6 +636,10 @@ void CFolderInventory::AddMod(int nWeaponID, int nID)
 	CLTGUITextItemCtrl* pSpace = CreateTextItem("-",LTNULL, LTNULL,LTFALSE,m_pFont);
 
 	int nIndent = g_pLayoutMgr->GetFolderCustomInt((eFolderID)m_nFolderID,"Indent");
+#ifdef NOLFSRC_MODERN
+	// HD fonts: a group places its parts in screen pixels, at the glyph scale
+	nIndent = P3_TextLen(nIndent);
+#endif
 	LTIntPt offset(nIndent,0);
 	int nWidth = (m_ListRect.right - m_ListRect.left);
 	int nHeight = pCtrl->GetHeight() + 2;
@@ -644,7 +648,11 @@ void CFolderInventory::AddMod(int nWeaponID, int nID)
 	offset.y = (nHeight - pSpace->GetHeight()) / 2;
 	pGroup->AddControl(pSpace,offset);
 
+#ifdef NOLFSRC_MODERN
+	offset.x = nIndent + P3_TextLen(pSpace->GetWidth() + 8);
+#else
 	offset.x = nIndent + pSpace->GetWidth() + 8;
+#endif
 	offset.y = (nHeight - pCtrl->GetHeight()) / 2;
 	pGroup->AddControl(pCtrl,offset,LTTRUE);
 
@@ -678,6 +686,10 @@ void CFolderInventory::AddAmmo(int nWeaponID, int nID, LTBOOL bInfinite)
 
 
 	int nIndent = g_pLayoutMgr->GetFolderCustomInt((eFolderID)m_nFolderID,"Indent");
+#ifdef NOLFSRC_MODERN
+	// HD fonts: a group places its parts in screen pixels, at the glyph scale
+	nIndent = P3_TextLen(nIndent);
+#endif
 	LTIntPt offset(nIndent,0);
 	int nWidth = (m_ListRect.right - m_ListRect.left);
 	int nHeight = pCtrl->GetHeight() + 2;
@@ -685,14 +697,22 @@ void CFolderInventory::AddAmmo(int nWeaponID, int nID, LTBOOL bInfinite)
 
 	offset.y = (nHeight - pSpace->GetHeight()) / 2;
 	pGroup->AddControl(pSpace,offset);
+#ifdef NOLFSRC_MODERN
+	offset.x += P3_TextLen(pSpace->GetWidth() + 8);
+#else
 	offset.x += pSpace->GetWidth() + 8;
+#endif
 
 	if (!bInfinite)
 	{
 		
 		offset.y = (nHeight - pCtrl->GetHeight()) / 2;
 		pGroup->AddControl(pCount,offset,LTTRUE);
+#ifdef NOLFSRC_MODERN
+		offset.x += P3_TextLen(pCount->GetWidth() + 8);
+#else
 		offset.x += pCount->GetWidth() + 8;
+#endif
 
 	}
 

@@ -228,9 +228,10 @@ LTBOOL CFolderCrosshair::Render ( HSURFACE hDestSurf )
         LTIntPt pos = m_pStyle->GetPos();
 #ifdef NOLFSRC_MODERN
 		// M-P3-01: below the style control, where it is drawn in the 4:3 area
+		// HD fonts: below the style's text as drawn, at the glyph scale
 		pos = P3_MenuPos(pos);
-		pos.x += m_nItemSpacing;
-		pos.y += m_nItemSpacing + m_pStyle->GetHeight();
+		pos.x += P3_MenuLen(m_nItemSpacing);
+		pos.y += P3_MenuLen(m_nItemSpacing) + P3_TextLen(m_pStyle->GetHeight());
 #else
 		pos.x += m_nItemSpacing + g_pInterfaceResMgr->GetXOffset();
 		pos.y += m_nItemSpacing + m_pStyle->GetHeight() + g_pInterfaceResMgr->GetYOffset();

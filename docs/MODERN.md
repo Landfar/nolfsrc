@@ -98,7 +98,8 @@ typed as `+Name value`; see `VARIABLES.md`.
 | `CrouchToggle` | int | 0 | the Duck control toggles crouching instead of holding it (not while swimming, on a ladder, on a vehicle or dead); Game options' "Toggle crouch" | M-P5-19 |
 | `UIScale` | float | 0.5 | HUD element scale, multiplied by the screen's height ratio (never drawn smaller than retail); Interface options' HUD size | M-P3-12 |
 | `UseGotyMenu` | int | 1 | main menu art: Game of the Year (1) or original (0) | M-P3-10 |
-| `TextScale` | float | 1 | bitmap fonts' glyph scale: the screen's height ratio times this, rounded (0 = the retail size); Interface options' "Text font" (Original size = 0, at the next start) | HD fonts |
+| `TextScale` | float | 1 | bitmap fonts' glyph scale: the screen's height ratio times this, rounded (0 = the retail size) | HD fonts |
+| `TextSize` | int | 0 | a fixed glyph scale (1 = the retail size) instead of TextScale's; 0 = auto. Interface options' "Text size" (at the next start) | HD fonts |
 | `TextSmooth` | int | 1 | glyphs drawn larger than retail: 1 the HD font images, 2 the retail glyphs smoothed soft, 3 smoothed sharp, 0 enlarged pixels; Interface options' "Text font" | HD fonts |
 | `ConsoleBackdrop` | int | 0 | developer console background: 0 or 1 the retail menus' blank tag, 2 black | M-P2-05 |
 | `BigHeadMode` | float | 0 | heads drawn 1.8 x this size (0 = off; read as 0 in multiplayer); also a server variable, set by the client on entering a world and from the console (M-P2-08) | M-P2-10 |

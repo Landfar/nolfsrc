@@ -30,6 +30,10 @@
 #define IDS_P3_FONT_SHARP				31222
 #define IDS_P3_FONT_SOFT				31223
 #define IDS_P3_FONT_PIXELS				31224
-#define IDS_P3_FONT_RETAIL				31225
+#define IDS_P3_FONT_RETAIL				31225	// no longer used (Text size 1x)
+#define IDS_P3_TEXT_SIZE				31226
+#define IDS_P3_HELP_TEXT_SIZE			31227
+#define IDS_P3_TEXT_SIZE_AUTO			31228
+#define IDS_P3_TEXT_SIZE_RETAIL			31229
 
 #endif // P3_STRINGS_H

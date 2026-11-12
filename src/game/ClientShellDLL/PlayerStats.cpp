@@ -4326,6 +4326,15 @@ void CPlayerStats::P3DrawBoundWeapons(HSURFACE hScreen, float fScale)
 			P3_DrawScaledSolid(hScreen, m_hWeaponSurf[i], x, y, fScale);
 			if (GetConsoleInt("BindingNumbers",1) > 0)
 			{
+				// HD fonts: the number at the glyph scale, right-aligned
+				// inside the icon as in the retail game (2 pixels from its
+				// right edge at scale 1), not past the screen's edge
+				uint32 nNumW = 0, nNumH = 0;
+				if (m_hNumberSurf[i])
+					g_pLTClient->GetSurfaceDims(m_hNumberSurf[i], &nNumW, &nNumH);
+				nTextOffset = nIconSize - (int)nNumW - P3_TextLen(m_bLargeNumbers ? 4 : 2);
+				if (nTextOffset < 0)
+					nTextOffset = 0;
 				g_pLTClient->SetOptimized2DBlend(LTSURFACEBLEND_MASK);
 				g_pLTClient->SetOptimized2DColor(hTextColor);
 				g_pLTClient->DrawSurfaceToSurface(hScreen,m_hNumberSurf[i],LTNULL,x+nTextOffset+1,y+1);

@@ -47,7 +47,8 @@ the modern build.
 | `UIScale` | 0.5 | HUD size, times the screen's height ratio (never smaller than retail, at most 4). Interface options: "HUD size". |
 | `RestrictCinematicsTo4x3` | 0 | 1 puts black bars beside cinematics on screens wider than 4:3. Interface options. |
 | `UseGotyMenu` | 1 | Main-menu art: 1 Game of the Year, 0 the original release's. Interface options. |
-| `TextScale` | 1 | Text size, times the screen's height ratio, rounded; 0 is the retail size. Interface options: "Text font", Original size (takes effect at the next start). |
+| `TextScale` | 1 | Text size, times the screen's height ratio, rounded; 0 is the retail size. |
+| `TextSize` | 0 | 0 auto (TextScale); 1 to 8 a fixed text size, 1 the original. Interface options: "Text size" (takes effect at the next start). |
 | `TextSmooth` | 1 | Text drawn larger than retail: 1 the HD font, 2 the original letters smoothed (soft), 3 smoothed (sharp), 0 enlarged pixels. Interface options: "Text font". |
 | `NoFunMenus` | 0 | 1 always shows the plain main menu. Otherwise it has a winter Cate from 15 to 31 December and a casual Cate on Fridays. |
 | `WindowMode` | 1 | Only applies when `Windowed` is 1: 2 is a borderless window at the desktop's resolution, anything else a framed window. Display options: "Window mode". |

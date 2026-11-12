@@ -24,6 +24,7 @@ extern VarTrack g_vtP3Cinematics4x3;    // RestrictCinematicsTo4x3
 extern VarTrack g_vtP3UseGotyMenu;      // UseGotyMenu
 extern VarTrack g_vtP3TextScale;        // TextScale (HD fonts)
 extern VarTrack g_vtP3TextSmooth;       // TextSmooth (HD fonts)
+extern VarTrack g_vtP3TextSize;         // TextSize (HD fonts)
 
 void        P3_InitVars();
 
@@ -95,7 +96,8 @@ float       P3_HUDScale();
 
 // HD fonts, stage 1: the bitmap fonts' glyph scale for the current screen,
 // the height ratio times TextScale rounded to a whole number (0 = off, 1 =
-// the default, retail 640x480 text size relative to the screen); applied to
+// the default, retail 640x480 text size relative to the screen), or TextSize
+// when it is 1 or more (a fixed glyph scale); applied to
 // every bitmap font (LithBitmapFont::SetGlobalScale). Called on each mode change.
 int         P3_TextScale();
 void        P3_ApplyTextScale();

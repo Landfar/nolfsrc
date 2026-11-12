@@ -17,6 +17,7 @@ VarTrack g_vtP3Cinematics4x3;
 VarTrack g_vtP3UseGotyMenu;
 VarTrack g_vtP3TextScale;
 VarTrack g_vtP3TextSmooth;
+VarTrack g_vtP3TextSize;
 
 void P3_InitVars()
 {
@@ -29,6 +30,7 @@ void P3_InitVars()
 	g_vtP3UseGotyMenu.Init(g_pLTClient, "UseGotyMenu", LTNULL, 1.0f);
 	g_vtP3TextScale.Init(g_pLTClient, "TextScale", LTNULL, 1.0f);
 	g_vtP3TextSmooth.Init(g_pLTClient, "TextSmooth", LTNULL, 1.0f);
+	g_vtP3TextSize.Init(g_pLTClient, "TextSize", LTNULL, 0.0f);
 }
 
 // ---------------------------------------------------------------------------
@@ -292,6 +294,11 @@ int P3_TextScale()
 {
 	float fScale = g_vtP3TextScale.GetFloat(1.0f);
 	if (fScale <= 0.0f) return 1;
+
+	// a fixed size (TextSize 1 to 8) rather than one following the screen
+	int nSize = (int)(g_vtP3TextSize.GetFloat(0.0f) + 0.5f);
+	if (nSize > 0)
+		return (nSize > 8) ? 8 : nSize;
 	if (fScale > 4.0f) fScale = 4.0f;
 
 	int nScale = (int)(fScale * g_pInterfaceResMgr->GetYRatio() + 0.5f);
